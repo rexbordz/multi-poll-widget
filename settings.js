@@ -69,6 +69,14 @@ function sendPollData() {
  */
 startEndBtn.addEventListener('click', () => {
   if (startEndBtn.textContent === 'Start Poll') {
+    // Get the first two required inputs
+    const requiredInputs = document.querySelectorAll('.choice-input[required]');
+    const allFilled = Array.from(requiredInputs).every(input => input.value.trim() !== '');
+
+    if (!allFilled) {
+      return;
+    }
+    
     sendPollData();
     startEndBtn.textContent = 'End Poll';
     startEndBtn.style.backgroundColor = '#e91d16'; // red when ending
