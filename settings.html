@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poll Settings</title>
+  <link rel="stylesheet" href="style.css"> <!-- or settings.css -->
+</head>
+<body>
+  <div class="settings-container">
+    <h1>Poll Settings</h1>
+
+    <!-- Poll Title -->
+    <div class="input-group">
+      <label for="poll-title">Poll Title</label>
+      <input type="text" id="poll-title" placeholder="Type number (1, 2...) in chat to vote">
+    </div>
+
+    <!-- Choices -->
+    <div class="input-group">
+      <label>Choices</label>
+      <input type="text" class="choice-input" value="Choice 1" required>
+      <input type="text" class="choice-input" value="Choice 2" required>
+      <input type="text" class="choice-input" placeholder="Optional Choice 3">
+      <input type="text" class="choice-input" placeholder="Optional Choice 4">
+      <input type="text" class="choice-input" placeholder="Optional Choice 5">
+    </div>
+
+    <!-- Duration -->
+    <div class="input-group">
+      <label for="duration-dropdown">Poll Duration</label>
+      <select id="duration-dropdown">
+        <option value="15">15s</option>
+        <option value="30" selected>30s</option>
+        <option value="60">1m</option>
+        <option value="120">2m</option>
+        <option value="600">10m</option>
+        <option value="0">Permanent</option>
+        <option value="custom" disabled hidden>Custom</option> <!-- optional -->
+      </select>
+      <input type="number" id="duration-input" placeholder="Custom seconds">
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-group">
+      <button id="start-end-poll">Start Poll</button>
+      
+      <button id="toggle-poll">Toggle Poll</button>
+      <button id="reset-poll">Clear</button>
+    </div>
+  </div>
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+// Create BroadcastChannel
+const channel = new BroadcastChannel('rexbordzPollWidget');
+
+// Select input elements
+const pollTitleInput = document.querySelector('#poll-title');
+const choiceInputs = document.querySelectorAll('.choice-input');
+const durationDropdown = document.querySelector('#duration-dropdown');
+const durationInput = document.querySelector('#duration-input');
+
+durationInput.addEventListener('input', () => {
+  if (durationInput.value.trim() !== '') {
+    durationDropdown.value = 'custom'; // reflect manual input
+  } else {
+    // reset dropdown to its previous selected value if manual input cleared
+    durationDropdown.value = '30'; // or your default
+  }
+});
+
+// Select buttons
+const startEndBtn = document.querySelector('#start-end-poll');
+const endBtn = document.querySelector('#end-poll');
+const toggleBtn = document.querySelector('#toggle-poll');
+const resetBtn = document.querySelector('#reset-poll');
+
+/**
+ * Collect all poll data and send via BroadcastChannel
+ */
+function sendPollData() {
+  const title = pollTitleInput.value.trim() || undefined;
+
+  const choicesArray = [];
+  choiceInputs.forEach(input => {
+    const text = input.value.trim();
+    if (text) {
+      choicesArray.push({ text });
+    }
+  });
+
+  // Minimum 2 choices check
+  if (choicesArray.length < 2) {
+    alert('Please provide at least 2 choices.');
+    return;
+  }
+
+  // Determine duration
+  let duration = 0;
+  if (durationInput.value) {
+    duration = parseInt(durationInput.value);
+    if (isNaN(duration) || duration < 0) duration = 0;
+  } else {
+    duration = parseInt(durationDropdown.value) || 0;
+  }
+
+  const pollData = {
+    title: title,
+    choicesArray: choicesArray,
+    duration: duration
+  };
+
+  // Send JSON to widget
+  channel.postMessage(pollData);
+  console.log('Poll data sent:', pollData);
+
+  startEndBtn.textContent = 'End Poll';
+}
+
+/**
+ * Button event listeners
+ */
+startEndBtn.addEventListener('click', () => {
+  if (startEndBtn.textContent === 'Start Poll') {
+    sendPollData();
+    startEndBtn.textContent = 'End Poll';
+    startEndBtn.style.backgroundColor = '#e91d16'; // red when ending
+  } else {
+    channel.postMessage({ action: 'endPoll' });
+    startEndBtn.textContent = 'Start Poll';
+    startEndBtn.style.backgroundColor = '#3b82f6'; // blue when starting
+  }
+});
+
+// Optional: reset button when poll ends automatically
+channel.onmessage = (e) => {
+  const data = e.data;
+  if ((data.action === 'pollState' && data.isActive === false)) {
+    startEndBtn.textContent = 'Start Poll';
+    startEndBtn.style.backgroundColor = '#3b82f6'; // reset color
+  }
+
+  if (data.action === 'lockStartButton') {
+    startEndBtn.disabled = data.lock;
+    startEndBtn.style.opacity = data.lock ? 0.5 : 1; // optional visual cue
+    startEndBtn.style.cursor = data.lock ? 'not-allowed' : 'pointer';
+  }
+};
+
+
+toggleBtn.addEventListener('click', () => {
+  channel.postMessage({ action: 'togglePoll' });
+});
+
+resetBtn.addEventListener('click', () => {
+  // Send resetPoll action
+  channel.postMessage({ action: 'resetPoll' });
+
+  // Optionally refresh or unlock Start button
+  channel.postMessage({ action: 'lockStartButton', lock: false });
+});
+
+
+
