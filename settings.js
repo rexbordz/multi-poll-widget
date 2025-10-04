@@ -110,9 +110,7 @@ toggleBtn.addEventListener('click', () => {
 resetBtn.addEventListener('click', () => {
   // Send resetPoll action
   channel.postMessage({ action: 'resetPoll' });
-
-  // Optionally refresh or unlock Start button
-  channel.postMessage({ action: 'lockStartButton', lock: false });
+  location.reload();
 });
 
 
