@@ -79,11 +79,11 @@ startEndBtn.addEventListener('click', () => {
     
     sendPollData();
     startEndBtn.textContent = 'End Poll';
-    startEndBtn.style.backgroundColor = '#e91d16'; // red when ending
+    startEndBtn.style.backgroundColor = '#af221dff'; // red when ending
   } else {
     channel.postMessage({ action: 'endPoll' });
     startEndBtn.textContent = 'Start Poll';
-    startEndBtn.style.backgroundColor = '#3b82f6'; // blue when starting
+    startEndBtn.style.backgroundColor = '#284cb8'; // blue when starting
   }
 });
 
@@ -92,7 +92,7 @@ channel.onmessage = (e) => {
   const data = e.data;
   if ((data.action === 'pollState' && data.isActive === false)) {
     startEndBtn.textContent = 'Start Poll';
-    startEndBtn.style.backgroundColor = '#3b82f6'; // reset color
+    startEndBtn.style.backgroundColor = '#284cb8'; // reset color
   }
 
   if (data.action === 'lockStartButton') {
