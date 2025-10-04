@@ -1,12 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
 @font-face {
-  font-family: 'URW DIN Black';
+  font-family: 'URW DIN';
   src: url('assets/fonts/URWDIN-Black.woff2') format('woff2'),
        url('assets/fonts/URWDIN-Black.woff') format('woff');
   font-weight: 900;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Bold.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Medium.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Regular.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
 
 :root {
   --card-bg: rgba(23, 23, 23, 0.98); /* dark semi-transparent background */
@@ -65,7 +90,7 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'URW DIN Black', sans-serif;
+  font-family: 'URW DIN', sans-serif;
   font-weight: 900; /* matches the font-face weight */
   font-size: 1.6em;
   gap: 10px;
@@ -240,6 +265,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .notifications {
+  font-family: 'URW DIN', sans-serif;
   position: fixed;
   bottom: 40px;       /* distance from bottom of screen */
   left: 50%;           /* center horizontally */
@@ -260,7 +286,7 @@ body::-webkit-scrollbar-thumb:hover {
   grid-template-columns: 70px 1fr 70px;
   border-radius: 5px;
   --color: #0abf30;
-  background: #22242f; /* solid background instead of gradient */
+  background: #202022;
   animation: show 0.3s ease 1 forwards;
 }
 
@@ -271,6 +297,14 @@ body::-webkit-scrollbar-thumb:hover {
   justify-content: center;
   align-items: center;
   font-size: x-large;
+}
+
+.toast .content {
+  text-align: left;       
+  display: flex;          
+  flex-direction: column; 
+  justify-content: center; 
+  align-items: flex-start; 
 }
 
 .toast .title{
@@ -319,26 +353,17 @@ body::-webkit-scrollbar-thumb:hover {
 
 .toast.error{
   --color: #f24d4c;
-  background-image: 
-      linear-gradient(
-          to right, #f24d4c55, #22242F 30%
-      );
+  background: #202022;
 }
 
 .toast.warning{
   --color: #e9bd0c;
-  background-image: 
-      linear-gradient(
-          to right, #e9bd0c55, #22242F 30%
-      );
+  background: #202022;
 }
 
 .toast.info{
   --color: #3498db;
-  background-image: 
-      linear-gradient(
-          to right, #3498db55, #22242F 30%
-      );
+  background: #202022;
 }
 
 .toast-logo {

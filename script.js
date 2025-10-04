@@ -7,7 +7,7 @@ const sbPassword = urlParams.get("password");
 // Global variables
 const streamerbot = "streamerbot";
 const tikfinity = "tikfinity";
-const widgetTitle = "Multi Poll Widget";
+const widgetTitle = "MultiPoll Widget";
 let streamerbotConnected = false;
 let tikfinityConnected = false;
 let notifications = document.querySelector('.notifications');
