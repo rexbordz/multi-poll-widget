@@ -339,6 +339,7 @@ margin: auto;
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 1.5em;
   gap: 10px;
   background-color: #141414;
   color: #fff;
@@ -349,8 +350,8 @@ margin: auto;
 }
 
 .rexbordz-logo {
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
 }
 .settings-container {
   width: 100%;
