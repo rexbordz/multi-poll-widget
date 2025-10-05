@@ -222,7 +222,7 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
 
   // Execute Poll Created Bot Message SB Action
   const actionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860"
-  const message = `POLL STARTED! • ${pollTitle}. Type your votes in!`;
+  const message = `POLL STARTED! • ${pollTitle}`;
   sendMessageToPlatforms(actionId, message);
 }
 
@@ -349,7 +349,7 @@ function highlightWinner() {
   : winnerTexts[0] || "";
 
   const winnerVotes = winners.map(i => 
-    choices[i].querySelector(".votes")?.textContent.trim() || "0 votes"
+    (choices[i].querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "")
   );
 
   const winnerPercent = winners.map(i => 
@@ -366,7 +366,7 @@ function highlightWinner() {
     pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
   } else {
     // Normal winner(s)
-    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} votes (${winnerPercent}%).`;
+    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} votes (${winnerPercent}).`;
   }
 
   sendMessageToPlatforms(actionId, pollResults);
