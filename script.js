@@ -251,13 +251,8 @@ function startPollTimer() {
   // Listen for transition end to highlight winner and auto-reset
   overlay.addEventListener("transitionend", function handler(event) {
     if (event.propertyName === "width") {
-      highlightWinner();
-
-      // Auto-reset poll after 8 seconds
-      pollTimer = setTimeout(() => resetPoll(), 8000);
-
+      endPoll(); // only call endPoll(), which will highlight the winner
       overlay.removeEventListener("transitionend", handler);
-      
     }
   });
 }
@@ -366,7 +361,7 @@ function highlightWinner() {
     pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
   } else {
     // Normal winner(s)
-    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} votes (${winnerPercent}).`;
+    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
   }
 
   sendMessageToPlatforms(actionId, pollResults);
