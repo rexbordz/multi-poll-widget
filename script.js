@@ -8,7 +8,7 @@ const sbPassword = urlParams.get("password");
 const streamerbot = "streamerbot";
 const tikfinity = "tikfinity";
 const widgetTitle = "MultiPoll Widget";
-let streamerbotConnected = false;
+let sbClientConnected = false;
 let tikfinityConnected = false;
 let notifications = document.querySelector('.notifications');
 
@@ -19,7 +19,6 @@ let pollDuration = 0;
 let isPollActive = false;
 let votedUsers = new Set();
 let maxChoices = 5; // default, can be updated per poll
-
 
 // Settings Page Listener
 const channel = new BroadcastChannel('rexbordzPollWidget');
@@ -53,19 +52,19 @@ const sbClient = new StreamerbotClient({
   password: sbPassword,
 
   onConnect: (data) => {
-    if (!streamerbotConnected){
-      streamerbotConnected = true;
-      console.log(`✅ Streamer.bot connected to ${sbAddress}:${sbPort}`)
+    if (!sbClientConnected){
+      sbClientConnected = true;
+      console.log(`✅ Streamer.bot Client connected to ${sbAddress}:${sbPort}`)
       console.debug(data);
-      createToast('success', 'fa-solid fa-circle-check', widgetTitle, 'Connected to Streamer.bot', streamerbot);
+      createToast('success', 'fa-solid fa-circle-check', widgetTitle, 'Connected to SB Client', streamerbot);
     }
   },
 
   onDisconnect: () => {
-    if (streamerbotConnected) {
-      streamerbotConnected = false;
-      console.warn("❌ Streamer.bot disconnected");
-      createToast('warning', 'fa-solid fa-triangle-exclamation', widgetTitle, 'Disconnected from Streamer.bot', streamerbot);
+    if (sbClientConnected) {
+      sbClientConnected = false;
+      console.warn("❌ Streamer.bot Client disconnected");
+      createToast('warning', 'fa-solid fa-triangle-exclamation', widgetTitle, 'Disconnected from SB Client', streamerbot);
     }  
   }
 });
@@ -220,6 +219,11 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
   votes = new Array(numberOfChoices).fill(0);
   updatePoll();
   startPollTimer();
+
+  // Execute Poll Created Bot Message SB Action
+  const actionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860"
+  const message = `POLL STARTED! • ${pollTitle}. Type your votes in!`;
+  sendMessageToPlatforms(actionId, message);
 }
 
 
@@ -260,8 +264,6 @@ function startPollTimer() {
   });
 }
 
-
-
 function castVote(choiceIndex) {
   votes[choiceIndex]++;
 
@@ -281,7 +283,6 @@ function castVote(choiceIndex) {
 
   updatePoll();
 }
-
 
 function updatePoll() {
   const totalVotes = votes.reduce((a, b) => a + b, 0);
@@ -308,8 +309,6 @@ function updatePoll() {
     choice.querySelector(".votes").textContent = `(${voteCount} votes)`;
   });
 }
-
-
 
 function highlightWinner() {
   if (!votes || votes.length === 0) return;
@@ -340,6 +339,39 @@ function highlightWinner() {
       choice.classList.add("loser");
     }
   });
+
+  const actionId = "82f37eb4-454b-48c3-8218-2b1a1511d6cf";
+
+  const winnerTexts = winners.map(i => 
+    choices[i].querySelector(".choice-text")?.textContent.trim()
+  ).filter(Boolean);
+
+  const winnerTextsFormatted = winnerTexts.length > 1 
+  ? winnerTexts.slice(0, -1).join(", ") + " and " + winnerTexts.slice(-1)
+  : winnerTexts[0] || "";
+
+  const winnerVotes = winners.map(i => 
+    choices[i].querySelector(".votes")?.textContent.trim() || "0 votes"
+  );
+
+  const winnerPercent = winners.map(i => 
+    choices[i].querySelector(".percent")?.textContent.trim() || "0%"
+  );
+
+  let pollResults;
+
+  if (maxVotes === 0) {
+    // Nobody voted
+    pollResults = "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL";
+  } else if (votes.length === 2 && votes[0] === votes[1]) {
+    // Two-choice tie
+    pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
+  } else {
+    // Normal winner(s)
+    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} votes (${winnerPercent}%).`;
+  }
+
+  sendMessageToPlatforms(actionId, pollResults);
 }
 
 function onChatMessage(username, message) {
@@ -392,9 +424,6 @@ function endPoll() {
   }
 }
 
-
-
-
 function resetPoll() {
   clearTimeout(pollTimer);
   isPollActive = false;
@@ -410,7 +439,6 @@ function resetPoll() {
     channel.postMessage({ action: 'pollState', isActive: false });
     return;
   }
-
 
   // Trigger fade out
   poll.classList.add("hidden");
@@ -432,6 +460,11 @@ function togglePoll() {
   document.getElementById("poll-widget").classList.toggle("hidden");
 }
 
+function sendMessageToPlatforms(actionId, message) {
+  sbClient.doAction(actionId, {"message" : message});
+}
+
+
 /*
 document.addEventListener('keydown', (event) => {
     const key = event.key; // '1', '2', etc.
@@ -442,3 +475,4 @@ document.addEventListener('keydown', (event) => {
 });*/
 
 connectTikFinity();
+connectSbWebSocket();
