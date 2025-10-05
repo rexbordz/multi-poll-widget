@@ -432,4 +432,13 @@ function togglePoll() {
   document.getElementById("poll-widget").classList.toggle("hidden");
 }
 
+/*
+document.addEventListener('keydown', (event) => {
+    const key = event.key; // '1', '2', etc.
+    if (key >= '1' && key <= '5') {
+        const voteIndex = parseInt(key) - 1; // Subtract 1 for 0-based index
+        castVote(voteIndex);
+    }
+});*/
+
 connectTikFinity();
