@@ -315,9 +315,23 @@ function highlightWinner() {
 
   const choices = document.querySelectorAll(".choice");
 
+  let pollResults;
+
+  if (maxVotes === 0) {
+    // Nobody voted
+    pollResults = "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL";
+  } else if (votes.length === 2 && votes[0] === votes[1]) {
+    // Two-choice tie
+    pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
+  } else {
+    // Normal winner(s)
+    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
+  }
+
   // no votes or all tied → don’t highlight
   if (maxVotes === 0 || winners.length === votes.length) {
     choices.forEach(choice => choice.classList.remove("winner", "loser"));
+    sendMessageToPlatforms(actionId, pollResults);
     return;
   }
 
@@ -350,19 +364,6 @@ function highlightWinner() {
   const winnerPercent = winners.map(i => 
     choices[i].querySelector(".percent")?.textContent.trim() || "0%"
   );
-
-  let pollResults;
-
-  if (maxVotes === 0) {
-    // Nobody voted
-    pollResults = "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL";
-  } else if (votes.length === 2 && votes[0] === votes[1]) {
-    // Two-choice tie
-    pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
-  } else {
-    // Normal winner(s)
-    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
-  }
 
   sendMessageToPlatforms(actionId, pollResults);
 }
