@@ -226,8 +226,6 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
   sendMessageToPlatforms(actionId, message);
 }
 
-
-
 function startPollTimer() {
   clearTimeout(pollTimer); // stop any previous auto-reset
 
