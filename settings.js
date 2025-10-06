@@ -64,10 +64,7 @@ function sendPollData() {
   startEndBtn.textContent = 'End Poll';
 }
 
-/**
- * Button event listeners
- */
-startEndBtn.addEventListener('click', () => {
+function startEndPoll() {
   if (startEndBtn.textContent === 'Start Poll') {
     // Get the first two required inputs
     const requiredInputs = document.querySelectorAll('.choice-input[required]');
@@ -76,16 +73,35 @@ startEndBtn.addEventListener('click', () => {
     if (!allFilled) {
       return;
     }
-    
+
     sendPollData();
     startEndBtn.textContent = 'End Poll';
     startEndBtn.style.backgroundColor = '#af221dff'; // red when ending
   } else {
-    channel.postMessage({ action: 'endPoll' });
+    channel.postMessage({ action: 'endPoll' }); // you might keep this only for local clicks
     startEndBtn.textContent = 'Start Poll';
     startEndBtn.style.backgroundColor = '#284cb8'; // blue when starting
   }
+}
+
+/**
+ * Button event listeners
+ */
+startEndBtn.addEventListener('click', startEndPoll);
+
+toggleBtn.addEventListener('click', () => {
+  channel.postMessage({ action: 'togglePoll' });
 });
+
+resetBtn.addEventListener('click', () => {
+  // Send resetPoll action
+  channel.postMessage({ action: 'resetPoll' });
+  location.reload();
+});
+
+/**
+ * Broadcast event listeners
+ */
 
 // Optional: reset button when poll ends automatically
 channel.onmessage = (e) => {
@@ -100,18 +116,16 @@ channel.onmessage = (e) => {
     startEndBtn.style.opacity = data.lock ? 0.5 : 1; // optional visual cue
     startEndBtn.style.cursor = data.lock ? 'not-allowed' : 'pointer';
   }
+
+  if (data.action === 'reloadPage') {
+    location.reload();
+  }
+
+  if (data.action === 'startEndBtn') {
+    startEndPoll(); 
+  }
+  
 };
-
-
-toggleBtn.addEventListener('click', () => {
-  channel.postMessage({ action: 'togglePoll' });
-});
-
-resetBtn.addEventListener('click', () => {
-  // Send resetPoll action
-  channel.postMessage({ action: 'resetPoll' });
-  location.reload();
-});
 
 
 

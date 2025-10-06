@@ -15,7 +15,7 @@ let notifications = document.querySelector('.notifications');
 // Poll state
 let votes; // for 5 choices max
 let pollTimer = null;      
-let pollDuration = 0;  
+let pollDuration = 0; // default, can be updated per poll 
 let isPollActive = false;
 let votedUsers = new Set();
 let maxChoices = 5; // default, can be updated per poll
@@ -65,25 +65,49 @@ const sbClient = new StreamerbotClient({
 // ==========================
 // Streamer.bot Event Handler
 // ==========================
-sbClient.on('Twitch.ChatMessage', (data) => {
-  console.log('📢 New Twitch Chat:', data);
-  const chat = data.data;
+sbClient.on('Twitch.ChatMessage', (response) => {
+  console.debug('📢 New Twitch Chat:', response);
+  const chat = response.data;
   onChatMessage(chat.user.login, chat.message.message);
-
 });
 
-sbClient.on('Kick.ChatMessage', (data) => {
-  console.log('📢 New Kick Chat:', data);
-  const chat = data.data;
+sbClient.on('Kick.ChatMessage', (response) => {
+  console.debug('📢 New Kick Chat:', response);
+  const chat = response.data;
   onChatMessage(chat.user.login, chat.text);
-
 });
 
-sbClient.on('YouTube.Message', (data) => {
-  console.log('📢 New YouTube Chat:', data);
-  const chat = data.data;
+sbClient.on('YouTube.Message', (response) => {
+  console.debug('📢 New YouTube Chat:', response);
+  const chat = response.data;
   onChatMessage(chat.user.name, chat.message);
+});
 
+sbClient.on('Raw.Action', (response) => {
+  console.debug('📢 Action Executed:', response);
+  const actionId = response.data.actionId;
+  
+  switch (actionId) {
+    case "8413040f-ee21-439d-be53-b44f55d35998":
+      console.debug("Action Executed: MultiPoll Widget • [Trigger] Clear");
+      resetPoll();
+      channel.postMessage({ action: 'reloadPage' });
+      break;
+
+    case "e14a127f-34f6-4091-ba06-a1eb4d387564":
+      console.debug("Action Executed: MultiPoll Widget • [Trigger] Start/End Poll");
+      channel.postMessage({ action: 'startEndBtn' });
+      break;
+
+    case "705bae3a-36f1-4f42-9bb1-110c8bc5feb7":
+      console.debug("Action Executed: MultiPoll Widget • [Trigger] Toggle Poll ");
+      togglePoll();
+      break;
+
+    default:
+      console.debug("Action ID not recognized");
+      break;
+  }
 });
 
 // TikFinity setup
@@ -159,7 +183,6 @@ function createToast(type, icon, title, text, source){
     )
 }
    
-
 // Modified function to accept an array of choice objects
 // Each object in choicesArray should have at least a `text` property
 function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to vote", duration = pollDuration) {
@@ -350,7 +373,6 @@ function highlightWinner() {
   sendMessageToPlatforms(actionId, pollResults);
 }
 
-
 function onChatMessage(username, message) {
   if (!isPollActive) return;  // check if poll is currently active
 
@@ -362,6 +384,10 @@ function onChatMessage(username, message) {
   castVote(vote - 1);
   votedUsers.add(username);
   console.log(`${username} voted ${message}`);
+}
+
+function sendMessageToPlatforms(actionId, message) {
+  sbClient.doAction(actionId, {"message" : message});
 }
 
 function showPoll() {
@@ -386,7 +412,9 @@ function endPoll() {
     }
 
     // Show winner immediately
-    highlightWinner();
+    if (pollDuration === 0) {
+      highlightWinner();
+    } 
     channel.postMessage({ action: 'lockStartButton', lock: true });
 
     // Wait 8 seconds before calling resetPoll
@@ -437,11 +465,6 @@ function togglePoll() {
   document.getElementById("poll-widget").classList.toggle("hidden");
 }
 
-function sendMessageToPlatforms(actionId, message) {
-  sbClient.doAction(actionId, {"message" : message});
-}
-
-
 /*
 document.addEventListener('keydown', (event) => {
     const key = event.key; // '1', '2', etc.
@@ -452,4 +475,3 @@ document.addEventListener('keydown', (event) => {
 });*/
 
 connectTikFinity();
-connectSbWebSocket();
