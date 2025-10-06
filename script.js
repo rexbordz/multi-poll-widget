@@ -11,6 +11,7 @@ const widgetTitle = "MultiPoll Widget";
 let sbClientConnected = false;
 let tikfinityConnected = false;
 let notifications = document.querySelector('.notifications');
+const BotMessageActionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860";
 
 // Poll state
 let votes; // for 5 choices max
@@ -237,9 +238,8 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
   startPollTimer();
 
   // Execute Poll Created Bot Message SB Action
-  const actionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860"
   const message = `GLOBAL POLL STARTED! • ${pollTitle}`;
-  sendMessageToPlatforms(actionId, message);
+  sendMessageToPlatforms(BotMessageActionId, message);
 }
 
 function startPollTimer() {
@@ -273,7 +273,6 @@ function startPollTimer() {
 
       // Auto-reset poll after 8 seconds
       pollTimer = setTimeout(() => resetPoll(), 8000);
-
       overlay.removeEventListener("transitionend", handler);
       
     }
@@ -327,13 +326,13 @@ function updatePoll() {
 }
 
 function highlightWinner() {
-  const actionId = "82f37eb4-454b-48c3-8218-2b1a1511d6cf";
   let pollResults;
 
   const choices = document.querySelectorAll(".choice");
 
   if (!votes || votes.length === 0) {
-    pollResults = "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL";
+    pollResults = "POLL RESULTS ARE HERE! • NOBODY voted. . . LOL";
+    return;
   } else {
     const maxVotes = Math.max(...votes);
     const winners = votes
@@ -346,7 +345,7 @@ function highlightWinner() {
     if (maxVotes === 0 || winners.length === votes.length) {
       // no highlights for tie or no votes
       pollResults = maxVotes === 0
-        ? "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL"
+        ? "POLL RESULTS ARE HERE! • NOBODY voted. . . LOL"
         : "POLL RESULTS ARE HERE! • It's a TIE. GG";
     } else {
       // highlight winners, mark others as losers
@@ -370,7 +369,7 @@ function highlightWinner() {
     }
   }
 
-  sendMessageToPlatforms(actionId, pollResults);
+  sendMessageToPlatforms(BotMessageActionId, pollResults);
 }
 
 function onChatMessage(username, message) {
@@ -454,6 +453,9 @@ function resetPoll() {
       choicesContainer.innerHTML = "";
       votes = [];
       delete poll.dataset.autoReset;
+
+      const titleElement = document.querySelector(".poll-card .title");
+      titleElement.textContent = "START A POLL";
 
       poll.removeEventListener("transitionend", handler);
       channel.postMessage({ action: 'pollState', isActive: false });
