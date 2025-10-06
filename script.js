@@ -33,16 +33,9 @@ channel.onmessage = (e) => {
 
   // If it's an action
   if (data.action === 'endPoll') endPoll();
-
-  
   if (data.action === 'togglePoll') togglePoll();
-  if (data.action === 'resetPoll') {
-    // Cancel any pending auto-reset
-    clearTimeout(pollTimer);
-
-    // Perform the reset
-    resetPoll();
-  }
+  if (data.action === 'resetPoll') resetPoll();
+  
 };
 
 // Streamer.Bot setup
@@ -222,7 +215,7 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
 
   // Execute Poll Created Bot Message SB Action
   const actionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860"
-  const message = `POLL STARTED! • ${pollTitle}`;
+  const message = `GLOBAL POLL STARTED! • ${pollTitle}`;
   sendMessageToPlatforms(actionId, message);
 }
 
@@ -251,8 +244,15 @@ function startPollTimer() {
   // Listen for transition end to highlight winner and auto-reset
   overlay.addEventListener("transitionend", function handler(event) {
     if (event.propertyName === "width") {
-      endPoll(); // only call endPoll(), which will highlight the winner
+      if (pollDuration !== 0) {
+        highlightWinner();
+      }
+
+      // Auto-reset poll after 8 seconds
+      pollTimer = setTimeout(() => resetPoll(), 8000);
+
       overlay.removeEventListener("transitionend", handler);
+      
     }
   });
 }
@@ -304,69 +304,52 @@ function updatePoll() {
 }
 
 function highlightWinner() {
-  if (!votes || votes.length === 0) return;
-
-  const maxVotes = Math.max(...votes);
-
-  // find all indexes with that max (could be tie)
-  const winners = votes
-    .map((v, i) => v === maxVotes ? i : -1)
-    .filter(i => i !== -1);
+  const actionId = "82f37eb4-454b-48c3-8218-2b1a1511d6cf";
+  let pollResults;
 
   const choices = document.querySelectorAll(".choice");
 
-  let pollResults;
-
-  if (maxVotes === 0) {
-    // Nobody voted
+  if (!votes || votes.length === 0) {
     pollResults = "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL";
-  } else if (votes.length === 2 && votes[0] === votes[1]) {
-    // Two-choice tie
-    pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
   } else {
-    // Normal winner(s)
-    pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
-  }
+    const maxVotes = Math.max(...votes);
+    const winners = votes
+      .map((v, i) => v === maxVotes ? i : -1)
+      .filter(i => i !== -1);
 
-  // no votes or all tied → don’t highlight
-  if (maxVotes === 0 || winners.length === votes.length) {
+    // clear classes first
     choices.forEach(choice => choice.classList.remove("winner", "loser"));
-    sendMessageToPlatforms(actionId, pollResults);
-    return;
-  }
 
-  // clear classes first
-  choices.forEach(choice => choice.classList.remove("winner", "loser"));
-
-  // highlight winners, mark others as losers
-  choices.forEach((choice, i) => {
-    if (winners.includes(i)) {
-      choice.classList.add("winner");
+    if (maxVotes === 0 || winners.length === votes.length) {
+      // no highlights for tie or no votes
+      pollResults = maxVotes === 0
+        ? "POLL RESULTS ARE HERE! • NOBODY VOTED. . . LOL"
+        : "POLL RESULTS ARE HERE! • It's a TIE. GG";
     } else {
-      choice.classList.add("loser");
+      // highlight winners, mark others as losers
+      choices.forEach((choice, i) => {
+        if (winners.includes(i)) choice.classList.add("winner");
+        else choice.classList.add("loser");
+      });
+
+      const winnerTexts = winners.map(i =>
+        choices[i].querySelector(".choice-text")?.textContent.trim()
+      ).filter(Boolean);
+
+      const winnerTextsFormatted = winnerTexts.length > 1
+        ? winnerTexts.slice(0, -1).join(", ") + " and " + winnerTexts.slice(-1)
+        : winnerTexts[0] || "";
+
+      const winnerVotes = (choices[winners[0]]?.querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "");
+      const winnerPercent = choices[winners[0]]?.querySelector(".percent")?.textContent.trim() || "0%";
+      
+      pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
     }
-  });
-
-  const actionId = "82f37eb4-454b-48c3-8218-2b1a1511d6cf";
-
-  const winnerTexts = winners.map(i => 
-    choices[i].querySelector(".choice-text")?.textContent.trim()
-  ).filter(Boolean);
-
-  const winnerTextsFormatted = winnerTexts.length > 1 
-  ? winnerTexts.slice(0, -1).join(", ") + " and " + winnerTexts.slice(-1)
-  : winnerTexts[0] || "";
-
-  const winnerVotes = winners.map(i => 
-    (choices[i].querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "")
-  );
-
-  const winnerPercent = winners.map(i => 
-    choices[i].querySelector(".percent")?.textContent.trim() || "0%"
-  );
+  }
 
   sendMessageToPlatforms(actionId, pollResults);
 }
+
 
 function onChatMessage(username, message) {
   if (!isPollActive) return;  // check if poll is currently active
