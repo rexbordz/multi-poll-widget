@@ -22,6 +22,27 @@ const endBtn = document.querySelector('#end-poll');
 const toggleBtn = document.querySelector('#toggle-poll');
 const resetBtn = document.querySelector('#reset-poll');
 
+// === Persistent Form Storage ===
+const inputGroups = document.querySelectorAll('.input-group input, .input-group select');
+
+// Load saved values
+inputGroups.forEach(field => {
+  const savedValue = localStorage.getItem(`poll-${field.id || field.className}-${field.name || ''}-${[...field.parentElement.children].indexOf(field)}`);
+  if (savedValue !== null) {
+    field.value = savedValue;
+  }
+});
+
+// Save values on change/input
+inputGroups.forEach(field => {
+  field.addEventListener('input', () => {
+    localStorage.setItem(
+      `poll-${field.id || field.className}-${field.name || ''}-${[...field.parentElement.children].indexOf(field)}`,
+      field.value
+    );
+  });
+});
+
 /**
  * Collect all poll data and send via BroadcastChannel
  */
@@ -94,8 +115,8 @@ toggleBtn.addEventListener('click', () => {
 });
 
 resetBtn.addEventListener('click', () => {
-  // Send resetPoll action
   channel.postMessage({ action: 'resetPoll' });
+  localStorage.clear(); // clear saved form data too
   location.reload();
 });
 
@@ -118,6 +139,7 @@ channel.onmessage = (e) => {
   }
 
   if (data.action === 'reloadPage') {
+    localStorage.clear();
     location.reload();
   }
 
