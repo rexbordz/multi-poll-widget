@@ -7,12 +7,21 @@ const choiceInputs = document.querySelectorAll('.choice-input');
 const durationDropdown = document.querySelector('#duration-dropdown');
 const durationInput = document.querySelector('#duration-input');
 
+let lastSelectedDuration = durationDropdown.value; // remember initial choice
+
+durationDropdown.addEventListener('change', () => {
+  // update the remembered choice whenever dropdown changes (but not when custom)
+  if (durationDropdown.value !== 'custom') {
+    lastSelectedDuration = durationDropdown.value;
+  }
+});
+
 durationInput.addEventListener('input', () => {
   if (durationInput.value.trim() !== '') {
     durationDropdown.value = 'custom'; // reflect manual input
   } else {
-    // reset dropdown to its previous selected value if manual input cleared
-    durationDropdown.value = '30'; // or your default
+    // revert to the last non-custom selection
+    durationDropdown.value = lastSelectedDuration;
   }
 });
 
