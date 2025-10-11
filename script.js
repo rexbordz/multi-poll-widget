@@ -18,7 +18,7 @@ let votes; // for 5 choices max
 let pollTimer = null;      
 let pollDuration = 0; // default, can be updated per poll 
 let isPollActive = false;
-let votedUsers = new Set();
+let votedUsers = new Map();
 let maxChoices = 5; // default, can be updated per poll
 
 // Settings Page Listener
@@ -69,19 +69,22 @@ const sbClient = new StreamerbotClient({
 sbClient.on('Twitch.ChatMessage', (response) => {
   console.debug('📢 New Twitch Chat:', response);
   const chat = response.data;
-  onChatMessage(chat.user.login, chat.message.message);
+  const platform = response.event.source;
+  onChatMessage(chat.user.login, chat.message.message, platform);
 });
 
 sbClient.on('Kick.ChatMessage', (response) => {
   console.debug('📢 New Kick Chat:', response);
   const chat = response.data;
-  onChatMessage(chat.user.login, chat.text);
+  const platform = response.event.source;
+  onChatMessage(chat.user.login, chat.text, platform);
 });
 
 sbClient.on('YouTube.Message', (response) => {
   console.debug('📢 New YouTube Chat:', response);
   const chat = response.data;
-  onChatMessage(chat.user.name, chat.message);
+  const platform = response.event.source;
+  onChatMessage(chat.user.name, chat.message, platform);
 });
 
 sbClient.on('Raw.Action', (response) => {
@@ -145,7 +148,7 @@ function connectTikFinity() {
         case "chat": {
           const chat = data.data;
           //console.log(`${chat.nickname || chat.uniqueId} ➝ ${chat.comment}`);
-          onChatMessage(chat.uniqueId, chat.comment);
+          onChatMessage(chat.uniqueId, chat.comment, "TikTok");
           break;
         }
 
@@ -269,6 +272,7 @@ function startPollTimer() {
     if (event.propertyName === "width") {
       if (pollDuration !== 0) {
         highlightWinner();
+        isPollActive = false;
       }
 
       // Auto-reset poll after 8 seconds
@@ -280,9 +284,8 @@ function startPollTimer() {
 }
 
 function castVote(choiceIndex) {
-  if (isPollActive) {
   
-    votes[choiceIndex]++;
+  votes[choiceIndex]++;
 
   const voteKey = document.querySelectorAll('.vote-key')[choiceIndex];
   const colors = ["flash-blue", "flash-red", "flash-green", "flash-yellow", "flash-orange"];
@@ -298,7 +301,8 @@ function castVote(choiceIndex) {
     voteKey.classList.remove(colors[choiceIndex]);
   }, 200);
 
-  updatePoll();}
+  updatePoll();
+  
 }
 
 function updatePoll() {
@@ -357,16 +361,25 @@ function highlightWinner() {
       });
 
       const winnerTexts = winners.map(i =>
-        choices[i].querySelector(".choice-text")?.textContent.trim()
+        `"${choices[i].querySelector(".choice-text")?.textContent.trim()}"`
       ).filter(Boolean);
 
       const winnerTextsFormatted = winnerTexts.length > 1
         ? winnerTexts.slice(0, -1).join(", ") + " and " + winnerTexts.slice(-1)
         : winnerTexts[0] || "";
 
-      const winnerVotes = (choices[winners[0]]?.querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "");
+
+      let winnerVotes = (choices[winners[0]]?.querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "");
       const winnerPercent = choices[winners[0]]?.querySelector(".percent")?.textContent.trim() || "0%";
-      
+
+      // Extract the numeric part (e.g. "2" from "2 votes")
+      const voteCount = parseInt(winnerVotes, 10);
+
+      // Rebuild the phrase correctly based on the number
+      if (!isNaN(voteCount)) {
+        winnerVotes = `${voteCount} ${voteCount === 1 ? "vote" : "votes"}`;
+      }
+
       pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
     }
   }
@@ -374,18 +387,26 @@ function highlightWinner() {
   sendMessageToPlatforms(BotMessageActionId, pollResults);
 }
 
-function onChatMessage(username, message) {
-  if (!isPollActive) return;  // check if poll is currently active
+function onChatMessage(username, message, platform) {
+  if (!isPollActive) return; // check if poll is currently active
 
   const vote = parseInt(message);
   if (!vote || vote < 1 || vote > maxChoices) return; // invalid vote
 
-  if (votedUsers.has(username)) return; // user already voted
+  // Ensure there's a Set for this platform
+  if (!votedUsers.has(platform)) {
+    votedUsers.set(platform, new Set());
+  }
+
+  const platformVoters = votedUsers.get(platform);
+
+  if (platformVoters.has(username)) return; // user already voted on this platform
 
   castVote(vote - 1);
-  votedUsers.add(username);
-  console.log(`${username} voted ${message}`);
+  platformVoters.add(username);
+  console.log(`${username} (${platform}) voted ${message}`);
 }
+
 
 function sendMessageToPlatforms(actionId, message) {
   sbClient.doAction(actionId, {"message" : message});
@@ -431,8 +452,8 @@ function endPoll() {
 }
 
 function resetPoll() {
-  clearTimeout(pollTimer);
   isPollActive = false;
+  clearTimeout(pollTimer);
   votedUsers.clear();
 
   const poll = document.getElementById("poll-widget");
