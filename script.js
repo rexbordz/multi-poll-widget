@@ -280,7 +280,9 @@ function startPollTimer() {
 }
 
 function castVote(choiceIndex) {
-  votes[choiceIndex]++;
+  if (isPollActive) {
+  
+    votes[choiceIndex]++;
 
   const voteKey = document.querySelectorAll('.vote-key')[choiceIndex];
   const colors = ["flash-blue", "flash-red", "flash-green", "flash-yellow", "flash-orange"];
@@ -296,7 +298,7 @@ function castVote(choiceIndex) {
     voteKey.classList.remove(colors[choiceIndex]);
   }, 200);
 
-  updatePoll();
+  updatePoll();}
 }
 
 function updatePoll() {
