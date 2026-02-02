@@ -61,11 +61,8 @@ You need this to be able to listen to TikTok events. If you need help setting th
     </p>
    <img width="809" height="313" alt="image" src="https://github.com/user-attachments/assets/a1b73a02-39c1-463a-8647-7b8e1ed60ced" />
     
-    <aside>
-    ✅
-
   > [!TIP]
-  > **SUCCESS!** You have successfully installed Multipoll.
+  > ✅ **SUCCESS!** You have successfully installed Multipoll.
         
 ---
 
