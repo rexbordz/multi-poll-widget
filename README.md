@@ -134,8 +134,8 @@ Your donations help me create better content and improve stream quality! If you'
 
 For technical support or inquiries, please contact me through my Discord channel:
 
-- **:discord: [Discord Server](https://discord.gg/pJWEPzbdfa)**
-    
+- <img src="https://github.com/user-attachments/assets/99e66009-11f1-4bcc-a06f-aa5c2f90524a" style="height: 1.5em;"> **[Discord Server](https://discord.gg/pJWEPzbdfa)**
+
     You can ask questions in the [🗨️❓│support forum](https://discord.com/channels/789352409473875988/1327979423835623464) or  [#❓│support channel](https://discord.com/channels/789352409473875988/800788710789742622)
     
 - 🐞 **Bug Reports**
