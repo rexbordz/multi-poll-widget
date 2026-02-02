@@ -25,7 +25,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
 
 ## **🚀 Installation**
 
-1. **Open [Streamer.bot](http://Streamer.bot) (For Twitch, YouTube or Kick)**
+1. **Open Streamer.bot (For Twitch, YouTube or Kick)**
     - You need to have WebSocket Server enabled:
         
         <img width="998" height="693" alt="image" src="https://github.com/user-attachments/assets/e7635495-9b25-4276-8be1-154402a82298" />
