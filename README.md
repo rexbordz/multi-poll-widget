@@ -12,13 +12,10 @@ Starting a poll is just as easy. I built a very intuitive settings page where yo
 
 ## **🔌 Requirements**
 
-<h3><img src="https://github.com/user-attachments/assets/77ff6913-e6d7-4fe0-b9a0-bf66f5e8f745" style="height: 1em; vertical-align: middle;"> Streamer.Bot (For Twitch, YouTube, and/or Kick)</h3>
-If you need help setting this up, visit their website at https://streamer.bot/.
+<img src="https://github.com/user-attachments/assets/77ff6913-e6d7-4fe0-b9a0-bf66f5e8f745" style="height: 1em; vertical-align: middle;"> **Streamer.Bot (For Twitch, YouTube, and/or Kick)** <br>
+If you need help setting this up, visit their [website](https://streamer.bot/).
 
-<br>
-
-<h3><img src="https://github.com/user-attachments/assets/3ec8eac2-17d2-4a97-a066-e55c1e29d2c5" style="height: 1em; vertical-align: middle;"> Tikfinity (For TikTok)</h3>
-
+<img src="https://github.com/user-attachments/assets/3ec8eac2-17d2-4a97-a066-e55c1e29d2c5" style="height: 1em; vertical-align: middle;"> **Tikfinity (For TikTok)** <br>
 You need this to be able to listen to TikTok events. If you need help setting this up, you can check out my [Tikfinity Setup Guide](https://www.notion.so/Tikfinity-Setup-Guide-241088f4f93e8051b991c6ef4b659934?pvs=21).
 
 ---
