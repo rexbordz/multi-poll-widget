@@ -52,7 +52,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
     <img width="1052" height="623" alt="image" src="https://github.com/user-attachments/assets/bac659a5-fe9e-4db1-ab3f-0e555ca8bf3d" />
     
   > [!NOTE]
-  > <img src="https://github.com/user-attachments/assets/c427e0a9-05af-4fd3-b620-7e5158f81f8d" style="height: 1.5em; vertical-align: middle;"> **Patreon Supporter Exclusive** - **Paid** Patreon members can have access to the **PRO** version of this widget which enables you to add **up to 10 choices** to the poll. You can get the pro version link in my **[Discord server](https://discord.gg/pJWEPzbdfa){:target="_blank"}**. <br><br>
+  > <img src="https://github.com/user-attachments/assets/c427e0a9-05af-4fd3-b620-7e5158f81f8d" style="height: 1.5em; vertical-align: middle;"> **Patreon Supporter Exclusive** - **Paid** Patreon members can have access to the **PRO** version of this widget which enables you to add **up to 10 choices** to the poll. You can get the pro version link in my **[Discord server](https://discord.gg/pJWEPzbdfa)**. <br><br>
   > **[Click here to be a paid member](https://www.patreon.com/rexbordz)**
     
 5. Start a poll using the settings page. First two choices are required. When you’re ready, just click **`Start Poll`**.
