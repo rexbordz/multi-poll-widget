@@ -53,7 +53,7 @@ html {
   height: 100%;
   margin: 0;
   background: transparent;
-  font-family: Roboto, system-ui, sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   color: var(--text);
 }
 
@@ -147,11 +147,13 @@ body::-webkit-scrollbar-thumb:hover {
   transition: width 1s linear; /* smooth shrink */
 }
 
-
+.poll-card {
+  font-size: 16px;
+}
 
 .title {
   text-align: center;
-  font-size: 1.3rem;
+  font-size: 1.3em;
   font-weight: bold;
   user-select: none;
 }
@@ -185,7 +187,7 @@ body::-webkit-scrollbar-thumb:hover {
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 0.95rem;
+  font-size: 0.95em;
   background: rgba(255,255,255,0.03);
   padding: 6px 8px;
   border-radius: 10px;
@@ -215,7 +217,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .choice-text {
-  font-size: 1rem;
+  font-size: 1em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -252,7 +254,7 @@ body::-webkit-scrollbar-thumb:hover {
 .choice-right {
   display: flex;
   gap: 5px;
-  font-size: 0.98rem;
+  font-size: 1em;
   font-weight: 500;
 }
 
@@ -395,7 +397,7 @@ margin: auto;
 
 .settings-container h1 {
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.5em;
   margin-bottom: 10px;
   font-weight: 600;
 }
@@ -408,7 +410,7 @@ margin: auto;
 
 .input-group label {
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.95em;
 }
 
 .input-group input,
@@ -420,7 +422,7 @@ margin: auto;
   border: none;
   background-color: #222;
   color: #fff;
-  font-size: 0.95rem;
+  font-size: 0.95em;
 }
 
 .input-group input:focus,
@@ -435,9 +437,141 @@ margin: auto;
   color: #696969;
 }
 
-/* Choice inputs stacked vertically */
+
+.choice-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: #222;
+  z-index: 0;
+
+  /* ADD THESE: Prepare for the slide animation */
+  max-height: 100px; /* Adjust to slightly taller than your normal row */
+  opacity: 1;
+  transition: max-height 0.5s ease, margin 0.5s ease-in-out, opacity 0.4s ease, transform 0.5s ease-in-out;
+}
+
+
+/* Winner effect in settings */
+.choice-container.winner {
+  filter: brightness(1.3);
+  transform: scale(1.02);
+  transition: transform 0.3s ease, filter 0.3s ease;
+  z-index: 10; /* Ensure it pops above others */
+  border: 2px solid gold; /* Optional: adds a "winning" border */
+}
+
+.choice-container.loser {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+  transition: opacity 0.3s ease;
+}
+
 .choice-input {
-  margin-bottom: 6px;
+  width: 100%;
+  padding-right: 100px; /* Make room so text doesn't overlap the stats */
+  z-index: 2; /* Middle Layer */
+  background: transparent !important; /* Force transparency */
+  border: 1px solid #ccc; /* Give it a border so you see the box */
+  position: relative;
+}
+
+.choice-stats {
+  position: absolute;
+  right: 10px;
+  z-index: 3;
+  pointer-events: none; /* User can click "through" the text to the input */
+  display: flex;
+  gap: 10px;
+  font-size: 0.85em;
+}
+
+/* 2. STATE LOGIC: Hiding/Fading based on .poll-active */
+
+/* Default: Hide stats and gauge when poll is NOT running */
+#choices-group .choice-stats {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#choices-group .gauge-fill.config-page {
+  visibility: hidden;
+  transition: width 0.5s ease, visibility 0.3s ease;
+}
+
+.gauge-fill.config-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%; /* Fill the container height */
+  z-index: 1; /* Bottom Layer */
+  transition: width 0.5s ease, opacity 0.3s ease; 
+}
+
+/* Color overrides for the config-page version of the gauges */
+.gauge-fill.config-page.blue { background-color: var(--color-blue); opacity: 0.5; }
+.gauge-fill.config-page.red { background-color: var(--color-red); opacity: 0.5; }
+.gauge-fill.config-page.green { background-color: var(--color-green); opacity: 0.5; }
+.gauge-fill.config-page.yellow { background-color: var(--color-yellow); opacity: 0.5; }
+.gauge-fill.config-page.orange { background-color: var(--color-orange); opacity: 0.5; }
+
+/* When poll is ACTIVE (we will toggle this class via JS) */
+/* Update this block in your CSS */
+#choices-group.poll-active .choice-stats {
+  opacity: 1; /* Force visibility for testing */
+}
+
+#choices-group.poll-active .gauge-fill.config-page {
+  visibility: visible;
+}
+
+
+/* Auto-hide containers with empty inputs when poll is active */
+/* 2. THE SMOOTH HIDE: Replace your display:none logic with this */
+#choices-group.poll-active .choice-container:has(input:placeholder-shown) {
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  border: none; /* Prevents border-ghosting while hidden */
+}
+
+/* Lock inputs during the poll so you don't accidentally type while people vote */
+#choices-group.poll-active .choice-input {
+  pointer-events: none;
+  cursor: default;
+}
+
+
+
+.choice-header {
+  display: flex;
+  justify-content: space-between; /* Pushes Label to left, Timer to right */
+  align-items: center;            /* Vertically centers them */
+  width: 100%;
+}
+
+.choice-header label {
+  margin: 0; /* removes default label margins */
+}
+
+.time-remaining {
+  font-weight: bold;
+  font-size: 0.9em; /* Slightly smaller for a "dashboard" look */
+  color: #ffffff;
+  
+  /* 0.5s Ease-In-Out Fade Logic */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+}
+
+/* When the poll is active, fade the timer in */
+#choices-group.poll-active .time-remaining {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* Button Group */
@@ -456,7 +590,7 @@ margin: auto;
   background-color: #555;
   color: #fff;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: bolder;
   transition: background-color 0.2s ease;
 }
 
@@ -497,7 +631,6 @@ button:active::after {
 #start-end-poll {
   background-color: #284cb8; /* blue */
   color: #fff;
-  font-weight: bold;
 }
 
 .button-group button:hover {

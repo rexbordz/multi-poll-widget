@@ -16,27 +16,57 @@ const BotMessageActionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860";
 // Poll state
 let votes; // for 5 choices max
 let pollTimer = null;      
+let countdownInterval;
 let pollDuration = 0; // default, can be updated per poll 
 let isPollActive = false;
 let votedUsers = new Map();
 let maxChoices = 5; // default, can be updated per poll
+let pollSessionId = 0;
+
+let pollInstanceCounter = 0;
+
+function logPoll(msg, extra = {}) {
+  console.debug(
+    `%c[POLL] ${msg}`,
+    "color:#4caf50;font-weight:bold",
+    {
+      session: pollSessionId,
+      instance: pollInstanceCounter,
+      ...extra
+    }
+  );
+}
 
 // Settings Page Listener
 const channel = new BroadcastChannel('rexbordzPollWidget');
 
 channel.onmessage = (e) => {
-  console.log('📡 BroadcastChannel received data:', e.data);
+  console.debug(
+    "%c[BC]",
+    "color:#ff9800;font-weight:bold",
+    e.data,
+    "session:",
+    pollSessionId
+  );
+  console.debug('📡 BroadcastChannel received data:', e.data);
   const data = e.data;
+
+  // 1. Check for Poll Creation
   if (data.choicesArray && data.choicesArray.length >= 2) {
     createPoll(data.choicesArray, data.title, data.duration);
     showPoll();
   }
 
-  // If it's an action
-  if (data.action === 'endPoll') endPoll();
+  // 2. Handle Actions - ADD clearInterval here to kill the zombie timer instantly
+  if (data.action === 'endPoll' || data.action === 'resetPoll') {
+    // Kill the MM:SS timer immediately before doing anything else
+    clearInterval(countdownInterval); 
+    
+    if (data.action === 'endPoll') endPoll();
+    if (data.action === 'resetPoll') resetPoll();
+  }
+
   if (data.action === 'togglePoll') togglePoll();
-  if (data.action === 'resetPoll') resetPoll();
-  
 };
 
 // Streamer.Bot setup
@@ -115,7 +145,7 @@ sbClient.on('Raw.Action', (response) => {
 });
 
 // TikFinity setup
-function connectTikFinity() {
+function connectTikfinity() {
   const socket = new WebSocket("ws://localhost:21213");
 
   socket.onopen = () => {
@@ -132,11 +162,7 @@ function connectTikFinity() {
       console.warn("❌ Disconnected from TikFinity");
       createToast('warning', 'fa-solid fa-triangle-exclamation', widgetTitle, 'Disconnected from Tikfinity', tikfinity);
     }
-    setTimeout(connectTikFinity, 3000);
-  };
-
-  socket.onerror = (err) => {
-    console.error("TikFinity WebSocket error:", err);
+    setTimeout(connectTikfinity, 3000);
   };
 
   socket.onmessage = (event) => {
@@ -147,7 +173,6 @@ function connectTikFinity() {
 
         case "chat": {
           const chat = data.data;
-          //console.log(`${chat.nickname || chat.uniqueId} ➝ ${chat.comment}`);
           onChatMessage(chat.uniqueId, chat.comment, "TikTok");
           break;
         }
@@ -161,6 +186,8 @@ function connectTikFinity() {
     }
   };
 }
+
+document.addEventListener('DOMContentLoaded', connectTikfinity);
 
 // Toast notifications for connections
 function createToast(type, icon, title, text, source){
@@ -190,6 +217,15 @@ function createToast(type, icon, title, text, source){
 // Modified function to accept an array of choice objects
 // Each object in choicesArray should have at least a `text` property
 function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to vote", duration = pollDuration) {
+  pollSessionId++;
+  pollInstanceCounter++;
+
+  logPoll("CREATE poll", {
+    title: pollTitle,
+    duration
+  });
+  const currentSession = pollSessionId;
+
   const numberOfChoices = choicesArray.length;
 
   votes = new Array(numberOfChoices).fill(0);
@@ -246,7 +282,28 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
 }
 
 function startPollTimer() {
+  logPoll("START timer", { duration: pollDuration });
+
   clearTimeout(pollTimer); // stop any previous auto-reset
+  clearInterval(countdownInterval); // Clear any existing timer first!
+
+  let secondsLeft = pollDuration;
+
+  if (pollDuration === 0) {
+    channel.postMessage({ action: 'timerTick', time: 'permanent' });
+    return; 
+  }
+
+  countdownInterval = setInterval(() => {
+    secondsLeft--;
+    
+    if (secondsLeft <= 0) {
+      clearInterval(countdownInterval);
+      channel.postMessage({ action: 'timerTick', time: 'ended' });
+    } else {
+      channel.postMessage({ action: 'timerTick', time: secondsLeft });
+    }
+  }, 1000);
 
   // Find or create overlay
   let overlay = document.querySelector(".poll-timer-overlay");
@@ -267,20 +324,35 @@ function startPollTimer() {
   overlay.style.transition = `width ${pollDuration}s linear`;
   overlay.style.width = "0%";
 
-  // Listen for transition end to highlight winner and auto-reset
-  overlay.addEventListener("transitionend", function handler(event) {
-    if (event.propertyName === "width") {
-      if (pollDuration !== 0) {
-        highlightWinner();
-        isPollActive = false;
-      }
-
-      // Auto-reset poll after 8 seconds
-      pollTimer = setTimeout(() => resetPoll(), 8000);
-      overlay.removeEventListener("transitionend", handler);
-      
-    }
+  const sessionAtStart = pollSessionId;
+    logPoll("ARM transitionend listener", {
+    sessionAtStart
   });
+
+  const handler = (event) => {
+    logPoll("TRANSITION END fired", {
+      sessionAtStart,
+      currentSession: pollSessionId
+    });
+    if (event.propertyName !== "width") return;
+
+    // ❌ Old poll — ignore completely
+    if (sessionAtStart !== pollSessionId) return;
+
+    if (pollDuration !== 0) {
+      highlightWinner();
+      isPollActive = false;
+    }
+
+    pollTimer = setTimeout(() => {
+      if (sessionAtStart === pollSessionId) {
+        resetPoll();
+      }
+    }, 8000);
+  };
+
+  overlay.addEventListener("transitionend", handler, { once: true });
+
 }
 
 function castVote(choiceIndex) {
@@ -307,52 +379,72 @@ function castVote(choiceIndex) {
 
 function updatePoll() {
   const totalVotes = votes.reduce((a, b) => a + b, 0);
+  const pollStats = []; // 1. Array to hold data for settings.js
 
+  // Handle No Votes (0.0% State)
   if (totalVotes === 0) {
-    // No votes → all 0%
-    document.querySelectorAll(".choice").forEach(choice => {
+    document.querySelectorAll(".choice").forEach((choice, i) => {
       choice.querySelector(".percent").textContent = "0.0%";
       choice.querySelector(".gauge-fill").style.width = "0%";
       choice.querySelector(".votes").textContent = `(0 votes)`;
+      
+      // 2. Add 0% data to the sync array
+      pollStats.push({ index: i, votes: 0, percentage: 0 });
     });
+    
+    // 3. Broadcast empty state to settings
+    channel.postMessage({ action: 'liveStatsUpdate', stats: pollStats });
     return;
   }
 
+  // Handle Active Votes
   document.querySelectorAll(".choice").forEach((choice, i) => {
     const voteCount = votes[i];
     const percent = (voteCount / totalVotes) * 100;
-
-    // Round to 1 decimal point
     const roundedPercent = parseFloat(percent.toFixed(1));
 
     choice.querySelector(".percent").textContent = `${roundedPercent}%`;
     choice.querySelector(".gauge-fill").style.width = `${roundedPercent}%`;
     choice.querySelector(".votes").textContent = `(${voteCount} votes)`;
+
+    // 4. Add live data to the sync array
+    pollStats.push({
+      index: i,
+      votes: voteCount,
+      percentage: roundedPercent
+    });
+  });
+
+  // 5. Broadcast live results to settings.js
+  channel.postMessage({
+    action: 'liveStatsUpdate',
+    stats: pollStats
   });
 }
 
+
 function highlightWinner() {
   let pollResults;
+  let winners = []; 
+  let maxVotes = 0;
 
   const choices = document.querySelectorAll(".choice");
 
-  if (!votes || votes.length === 0) {
+  // 1. Calculate Results
+  if (!votes || votes.length === 0 || Math.max(...votes) === 0) {
     pollResults = "POLL RESULTS ARE HERE! • NOBODY voted. . . LOL";
-    return;
+    // Don't return! Let it flow to the bottom so we can tell settings to reset.
   } else {
-    const maxVotes = Math.max(...votes);
-    const winners = votes
+    maxVotes = Math.max(...votes); // Removed "const"
+    winners = votes                // Removed "const"
       .map((v, i) => v === maxVotes ? i : -1)
       .filter(i => i !== -1);
 
     // clear classes first
     choices.forEach(choice => choice.classList.remove("winner", "loser"));
 
-    if (maxVotes === 0 || winners.length === votes.length) {
-      // no highlights for tie or no votes
-      pollResults = maxVotes === 0
-        ? "POLL RESULTS ARE HERE! • NOBODY voted. . . LOL"
-        : "POLL RESULTS ARE HERE! • It's a TIE. GG";
+    if (winners.length === votes.length) {
+      pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
     } else {
       // highlight winners, mark others as losers
       choices.forEach((choice, i) => {
@@ -368,14 +460,9 @@ function highlightWinner() {
         ? winnerTexts.slice(0, -1).join(", ") + " and " + winnerTexts.slice(-1)
         : winnerTexts[0] || "";
 
-
       let winnerVotes = (choices[winners[0]]?.querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "");
       const winnerPercent = choices[winners[0]]?.querySelector(".percent")?.textContent.trim() || "0%";
-
-      // Extract the numeric part (e.g. "2" from "2 votes")
       const voteCount = parseInt(winnerVotes, 10);
-
-      // Rebuild the phrase correctly based on the number
       if (!isNaN(voteCount)) {
         winnerVotes = `${voteCount} ${voteCount === 1 ? "vote" : "votes"}`;
       }
@@ -384,8 +471,17 @@ function highlightWinner() {
     }
   }
 
+  // 2. Send Bot Message
   sendMessageToPlatforms(BotMessageActionId, pollResults);
+
+  // 3. Send the winner to config page (The Handshake)
+  channel.postMessage({
+    action: 'highlightWinner',
+    winners: winners, 
+    maxVotes: maxVotes
+  });
 }
+
 
 function onChatMessage(username, message, platform) {
   if (!isPollActive) return; // check if poll is currently active
@@ -404,7 +500,7 @@ function onChatMessage(username, message, platform) {
 
   castVote(vote - 1);
   platformVoters.add(username);
-  console.log(`${username} (${platform}) voted ${message}`);
+  console.debug(`${username} (${platform}) voted ${message}`);
 }
 
 
@@ -417,73 +513,114 @@ function showPoll() {
 }
 
 function endPoll() {
+  logPoll("END poll clicked manually");
   const overlay = document.querySelector(".poll-timer-overlay");
 
+  // STOP THE CLOCK
+  clearInterval(countdownInterval);
+  
+  channel.postMessage({ action: 'timerTick', time: 'ended' });
+  
   if (votes && votes.some(v => v > 0)) {
     if (overlay) {
-      // Remove existing transition to reset instantly
       overlay.style.transition = "none";
-      overlay.style.width = getComputedStyle(overlay).width; // force current width
-
-      // Force reflow so that next transition applies
+      overlay.style.width = getComputedStyle(overlay).width;
       void overlay.offsetWidth;
-
-      // Apply transition and collapse
       overlay.style.transition = "width 0.5s linear";
       overlay.style.width = "0%";
     }
 
-    // Show winner immediately
-    if (pollDuration === 0) {
-      highlightWinner();
-    } 
+    highlightWinner();
+    
     channel.postMessage({ action: 'lockStartButton', lock: true });
 
-    // Wait 8 seconds before calling resetPoll
+    const sessionAtEnd = pollSessionId;
+
     pollTimer = setTimeout(() => {
+      if (sessionAtEnd !== pollSessionId) {
+        console.warn("[POLL] Ignored stale endPoll reset", {
+          sessionAtEnd,
+          currentSession: pollSessionId
+        });
+        return;
+      }
+
       resetPoll();
-      // Unlock Start/End button
       channel.postMessage({ action: 'lockStartButton', lock: false });
     }, 8000);
 
   } else {
+    // No votes? Just reset everything instantly
     resetPoll();
   }
 }
 
+
 function resetPoll() {
+  logPoll("RESET poll CALLED");
+
+  const overlay = document.querySelector(".poll-timer-overlay");
+  if (overlay) overlay.remove();
+
+  logPoll("RESET clearing timers", {
+    hasPollTimer: !!pollTimer,
+    hasCountdown: !!countdownInterval
+  });
+
+  // STOP LOGIC IMMEDIATELY
   isPollActive = false;
   clearTimeout(pollTimer);
+  clearInterval(countdownInterval);
   votedUsers.clear();
+
+  // SETTINGS PAGE – hide timer instantly
+  channel.postMessage({ action: "timerTick", time: "ended" });
 
   const poll = document.getElementById("poll-widget");
   const choicesContainer = document.querySelector(".choices");
+  const titleElement = document.querySelector(".poll-card .title");
 
-  // If already hidden, clear immediately
-  if (poll.classList.contains("hidden")) {
+  // --- STATE RESET (non-visual, safe immediately) ---
+  votes = [];
+  channel.postMessage({ action: "pollState", isActive: false });
+
+  // --- VISUAL RESET (AFTER FADE) ---
+  const finalizeVisualReset = () => {
     choicesContainer.innerHTML = "";
-    votes = [];
-    channel.postMessage({ action: 'pollState', isActive: false });
+    if (titleElement) titleElement.textContent = "START A POLL";
+    logPoll("RESET finalize UI");
+  };
+
+  // 3. FADE OUT
+  // Clear it immediately so no text is visible during the fade-out
+  if (titleElement) titleElement.textContent = ""; 
+  
+  poll.classList.add("hidden");
+
+  // Then in finalizeVisualReset, put the default text back
+  finalizeVisualReset = () => {
+    choicesContainer.innerHTML = "";
+    if (titleElement) titleElement.textContent = "START A POLL";
+  };
+
+  // If already hidden or no transition → reset immediately
+  const styles = getComputedStyle(poll);
+  const hasTransition =
+    styles.transitionDuration !== "0s" &&
+    styles.transitionDuration !== "0ms";
+
+  if (!hasTransition || poll.classList.contains("hidden")) {
+    finalizeVisualReset();
     return;
   }
 
-  // Trigger fade out
-  poll.classList.add("hidden");
+  // Wait for fade-out to finish
+  const onFadeOutEnd = (event) => {
+    if (event.target !== poll) return;
+    finalizeVisualReset();
+  };
 
-  // Wait for fade to complete
-  poll.addEventListener("transitionend", function handler(event) {
-    if (event.propertyName === "opacity") {
-      choicesContainer.innerHTML = "";
-      votes = [];
-      delete poll.dataset.autoReset;
-
-      const titleElement = document.querySelector(".poll-card .title");
-      titleElement.textContent = "START A POLL";
-
-      poll.removeEventListener("transitionend", handler);
-      channel.postMessage({ action: 'pollState', isActive: false });
-    }
-  });
+  poll.addEventListener("transitionend", onFadeOutEnd, { once: true });
 }
 
 function togglePoll() {
@@ -498,5 +635,3 @@ document.addEventListener('keydown', (event) => {
         castVote(voteIndex);
     }
 });*/
-
-connectTikFinity();

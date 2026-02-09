@@ -21,14 +21,64 @@
     </div>
 
     <!-- Choices -->
-    <div class="input-group">
-      <label>Choices</label>
-      <input type="text" class="choice-input" value="Choice 1" placeholder="Required" required>
-      <input type="text" class="choice-input" value="Choice 2" placeholder="Required" required>
-      <input type="text" class="choice-input" placeholder="Optional">
-      <input type="text" class="choice-input" placeholder="Optional">
-      <input type="text" class="choice-input" placeholder="Optional">
+    <div class="input-group" id="choices-group">
+      <div class="choice-header">
+        <label>Choices</label>
+        <div class="time-remaining"></div>
+      </div>
+
+      <!-- Choice 1 (Required) -->
+      <div class="choice-container">
+        <input type="text" class="choice-input" value="Choice 1" placeholder="Required" required>
+        <div class="gauge-fill config-page blue" style="width: 0%;"></div>
+        <div class="choice-stats">
+          <span class="votes config-page">0 votes</span>
+          <span class="percentage config-page">0%</span>
+        </div>
+      </div>
+
+      <!-- Choice 2 (Required) -->
+      <div class="choice-container">
+        <input type="text" class="choice-input" value="Choice 2" placeholder="Required" required>
+        <div class="gauge-fill config-page red" style="width: 0%;"></div>
+        <div class="choice-stats">
+          <span class="votes config-page">0 votes</span>
+          <span class="percentage config-page">0%</span>
+        </div>
+      </div>
+
+      <!-- Choice 3 (Optional) -->
+      <div class="choice-container">
+        <input type="text" class="choice-input" placeholder="Optional">
+        <div class="gauge-fill config-page green" style="width: 0%;"></div>
+        <div class="choice-stats">
+          <span class="votes config-page">0 votes</span>
+          <span class="percentage config-page">0%</span>
+        </div>
+      </div>
+
+      <!-- Choice 4 (Optional) -->
+      <div class="choice-container">
+        <input type="text" class="choice-input" placeholder="Optional">
+        <div class="gauge-fill config-page yellow" style="width: 0%;"></div>
+        <div class="choice-stats">
+          <span class="votes config-page">0 votes</span>
+          <span class="percentage config-page">0%</span>
+        </div>
+      </div>
+
+      <!-- Choice 5 (Optional) -->
+      <div class="choice-container">
+        <input type="text" class="choice-input" placeholder="Optional">
+        <div class="gauge-fill config-page orange" style="width: 0%;"></div>
+        <div class="choice-stats">
+          <span class="votes config-page">0 votes</span>
+          <span class="percentage config-page">0%</span>
+        </div>
+      </div>
     </div>
+
+    
 
     <!-- Duration -->
     <div class="input-group">

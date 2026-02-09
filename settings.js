@@ -95,23 +95,54 @@ function sendPollData() {
 }
 
 function startEndPoll() {
+  // Use the ID so we don't accidentally pick the Title or Duration groups
+  const choicesGroup = document.querySelector('#choices-group');
+
   if (startEndBtn.textContent === 'Start Poll') {
-    // Get the first two required inputs
+    // Reset data graphics
+    const gauges = document.querySelectorAll('.gauge-fill.config-page');
+    gauges.forEach(g => {
+      g.style.transition = 'none'; // Snap to 0
+      g.style.width = '0%';
+    });
+
+    // Force reflow
+    void choicesGroup.offsetWidth;
+
+    // Re-enable transition for the new poll
+    gauges.forEach(g => {
+      g.style.transition = 'width 0.5s ease';
+    });
+
+    // Input validation
     const requiredInputs = document.querySelectorAll('.choice-input[required]');
     const allFilled = Array.from(requiredInputs).every(input => input.value.trim() !== '');
 
-    if (!allFilled) {
-      return;
-    }
+    if (!allFilled) return;
 
     sendPollData();
+    
+    // This will now correctly trigger the CSS for the choices!
+    choicesGroup.classList.add('poll-active'); 
+    
     startEndBtn.textContent = 'End Poll';
-    startEndBtn.style.backgroundColor = '#af221dff'; // red when ending
+    startEndBtn.style.backgroundColor = '#af221dff';
   } else {
-    channel.postMessage({ action: 'endPoll' }); // you might keep this only for local clicks
-    startEndBtn.textContent = 'Start Poll';
-    startEndBtn.style.backgroundColor = '#284cb8'; // blue when starting
+    
+    channel.postMessage({ action: 'endPoll' }); 
+    
+    // LOCK the button so they can't restart until the 8s reset is done
+    startEndBtn.disabled = true;
+    startEndBtn.textContent = 'Showing Results...';
+    startEndBtn.style.opacity = "0.5";
+    startEndBtn.style.cursor = "not-allowed";
   }
+}
+
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 /**
@@ -125,9 +156,21 @@ toggleBtn.addEventListener('click', () => {
 
 resetBtn.addEventListener('click', () => {
   channel.postMessage({ action: 'resetPoll' });
-  localStorage.clear(); // clear saved form data too
-  location.reload();
+  
+  const timeDisplay = document.querySelector('.time-remaining');
+  if (timeDisplay) {
+    timeDisplay.textContent = "";
+    timeDisplay.style.display = "none";
+  }
+
+  localStorage.clear(); 
+  
+  // Give the broadcast 100ms to "fly" before killing the page
+  setTimeout(() => {
+    location.reload();
+  }, 100);
 });
+
 
 /**
  * Broadcast event listeners
@@ -136,10 +179,107 @@ resetBtn.addEventListener('click', () => {
 // Optional: reset button when poll ends automatically
 channel.onmessage = (e) => {
   const data = e.data;
-  if ((data.action === 'pollState' && data.isActive === false)) {
-    startEndBtn.textContent = 'Start Poll';
-    startEndBtn.style.backgroundColor = '#284cb8'; // reset color
+
+  // --- Live Sync Logic ---
+  if (data.action === 'liveStatsUpdate' && data.stats) {
+    const containers = document.querySelectorAll('.choice-container');
+    
+    data.stats.forEach((stat, i) => {
+      // Ensure we have a matching container in the settings UI
+      const container = containers[i];
+      if (container) {
+        const votesEl = container.querySelector('.votes');
+        const percentEl = container.querySelector('.percentage');
+        const gaugeEl = container.querySelector('.gauge-fill');
+
+        if (votesEl) votesEl.textContent = `${stat.votes} votes`;
+        if (percentEl) percentEl.textContent = `${stat.percentage}%`;
+        if (gaugeEl) gaugeEl.style.width = `${stat.percentage}%`;
+      }
+    });
   }
+
+  // HIGHLIGHT WINNER (Automatic or Manual)
+  if (data.action === 'highlightWinner') {
+    const choicesGroup = document.querySelector('#choices-group');
+    const containers = document.querySelectorAll('.choice-container');
+    
+    // Count how many choices were actually part of the poll (not empty)
+    const activeChoicesCount = Array.from(document.querySelectorAll('.choice-input'))
+                                    .filter(input => input.value.trim() !== "").length;
+
+    choicesGroup.classList.add('poll-active');
+
+    // GLOBAL TIE CHECK: 
+    // No highlight if EVERY active choice is a winner (Global Tie) OR nobody voted.
+    const isGlobalTie = data.winners.length === activeChoicesCount || data.maxVotes === 0;
+
+    containers.forEach((container, i) => {
+      container.classList.remove('winner', 'loser');
+
+      if (!isGlobalTie) {
+        if (data.winners.includes(i)) {
+          container.classList.add('winner');
+        } else {
+          // Only mark as loser if the input isn't empty (part of the active group)
+          if (container.querySelector('.choice-input').value.trim() !== "") {
+            container.classList.add('loser');
+          }
+        }
+      }
+    });
+
+    // LOCK BUTTON: Sync the button UI even if the timer ended it
+    startEndBtn.disabled = true;
+    startEndBtn.textContent = 'Showing Results...';
+    startEndBtn.style.opacity = "0.5";
+    startEndBtn.style.cursor = "not-allowed";
+    startEndBtn.style.backgroundColor = '#af221dff'; 
+  }
+
+  // Timer Update
+  if (data.action === 'timerTick') {
+    const timeDisplay = document.querySelector('.time-remaining');
+    if (!timeDisplay) return;
+
+    if (data.time === 'permanent' || data.time === '' || data.time === null) {
+      timeDisplay.style.display = 'none'; // Hide for permanent or resets
+      timeDisplay.textContent = "";
+    } else if (data.time === 'ended') {
+      timeDisplay.style.display = 'block';
+      timeDisplay.textContent = "Poll Ended!";
+    } else {
+      timeDisplay.style.display = 'block';
+      timeDisplay.textContent = `Time Left: ${formatTime(data.time)}`;
+    }
+  }
+
+
+  // RESET (Poll State false)
+  if (data.action === 'pollState' && data.isActive === false) {
+    const choicesGroup = document.querySelector('#choices-group');
+    choicesGroup.classList.remove('poll-active');
+    
+    document.querySelectorAll('.choice-container').forEach(c => {
+      c.classList.remove('winner', 'loser');
+      const g = c.querySelector('.gauge-fill');
+      if (g) g.style.width = "0%";
+    });
+
+    const timeDisplay = document.querySelector('.time-remaining');
+    if (timeDisplay) {
+      timeDisplay.textContent = "";
+      timeDisplay.style.display = "none";
+    }
+
+    // UNLOCK BUTTON
+    startEndBtn.disabled = false;
+    startEndBtn.textContent = 'Start Poll';
+    startEndBtn.style.backgroundColor = '#284cb8';
+    startEndBtn.style.opacity = "1";
+    startEndBtn.style.cursor = "pointer";
+  }
+
 
   if (data.action === 'lockStartButton') {
     startEndBtn.disabled = data.lock;
