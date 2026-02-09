@@ -557,74 +557,40 @@ function endPoll() {
 
 
 function resetPoll() {
-  logPoll("RESET poll CALLED");
-
   const overlay = document.querySelector(".poll-timer-overlay");
   if (overlay) overlay.remove();
-
-  logPoll("RESET clearing timers", {
-    hasPollTimer: !!pollTimer,
-    hasCountdown: !!countdownInterval
-  });
-
-  // STOP LOGIC IMMEDIATELY
   isPollActive = false;
+
+  // Clear any timers an data
   clearTimeout(pollTimer);
   clearInterval(countdownInterval);
   votedUsers.clear();
+  votes = [];
 
   // SETTINGS PAGE – hide timer instantly
   channel.postMessage({ action: "timerTick", time: "ended" });
 
+  // Visual Reset
   const poll = document.getElementById("poll-widget");
   const choicesContainer = document.querySelector(".choices");
   const titleElement = document.querySelector(".poll-card .title");
 
-  // --- STATE RESET (non-visual, safe immediately) ---
-  votes = [];
   channel.postMessage({ action: "pollState", isActive: false });
-
-  // --- VISUAL RESET (AFTER FADE) ---
-  const finalizeVisualReset = () => {
-    choicesContainer.innerHTML = "";
-    if (titleElement) titleElement.textContent = "START A POLL";
-    logPoll("RESET finalize UI");
-  };
-
-  // 3. FADE OUT
-  // Clear it immediately so no text is visible during the fade-out
-  if (titleElement) titleElement.textContent = ""; 
-  
   poll.classList.add("hidden");
-
-  // Then in finalizeVisualReset, put the default text back
-  finalizeVisualReset = () => {
-    choicesContainer.innerHTML = "";
-    if (titleElement) titleElement.textContent = "START A POLL";
-  };
-
-  // If already hidden or no transition → reset immediately
-  const styles = getComputedStyle(poll);
-  const hasTransition =
-    styles.transitionDuration !== "0s" &&
-    styles.transitionDuration !== "0ms";
-
-  if (!hasTransition || poll.classList.contains("hidden")) {
-    finalizeVisualReset();
-    return;
-  }
-
-  // Wait for fade-out to finish
-  const onFadeOutEnd = (event) => {
-    if (event.target !== poll) return;
-    finalizeVisualReset();
-  };
-
-  poll.addEventListener("transitionend", onFadeOutEnd, { once: true });
 }
 
 function togglePoll() {
-  document.getElementById("poll-widget").classList.toggle("hidden");
+  const poll = document.getElementById("poll-widget");
+  const titleElement = document.querySelector(".poll-card .title");
+  const choicesContainer = document.querySelector(".choices");
+
+  poll.classList.toggle("hidden");
+
+  // If we just made it visible but no poll is running, ensure it shows the "Blank" state
+  if (!poll.classList.contains("hidden") && !isPollActive) {
+    if (choicesContainer) choicesContainer.innerHTML = "";
+    if (titleElement) titleElement.textContent = "START A POLL";
+  }
 }
 
 /*
