@@ -32,21 +32,21 @@
   font-style: normal;
 }
 
-
 :root {
   --card-bg: rgba(23, 23, 23, 0.98); /* dark semi-transparent background */
-  --card-radius: 12px;
-  --card-pad: 16px;
+  --card-radius: 24px;
+  --card-pad: 25px;
   --card-shadow: 0 4px 10px rgba(0,0,0,0.4);
 
   --text: #fff;
   --muted: rgba(255,255,255,0.6);
 
-  --color-blue: #3b82f6;
-  --color-red: #ef4444;
-  --color-green: #22c55e;
-  --color-yellow: #eab308;
-  --color-orange: #f97316;
+  --color-choice-1: #3b82f6;
+  --color-choice-2: #ef4444;
+  --color-choice-3: #22c55e;
+  --color-choice-4: #eab308;
+  --color-choice-5: #f97316;
+  --font-size: 18px;
 }
 
 html {
@@ -124,7 +124,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .poll-card {
-  font-size: 18px;
+  font-size: var(--font-size);
   background: var(--card-bg);
   border-radius: var(--card-radius);
   padding: var(--card-pad);
@@ -132,7 +132,7 @@ body::-webkit-scrollbar-thumb:hover {
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1.5em;
   position: relative; /* so overlay can be positioned */
   overflow: hidden;
 }
@@ -158,13 +158,13 @@ body::-webkit-scrollbar-thumb:hover {
 .choices {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 1em;
 }
 
 .choice {
   display: grid;
-  grid-template-columns: 48px 1fr auto;
-  gap: 12px;
+  grid-template-columns: auto 1fr auto; 
+  gap: 0.67em;
   align-items: center;
   min-height: 44px;
   transition: opacity 0.3s ease, filter 0.3s ease, transform 0.3s ease;
@@ -185,25 +185,25 @@ body::-webkit-scrollbar-thumb:hover {
   justify-content: center;
   font-weight: bold;
   font-size: 0.95em;
-  background: rgba(255,255,255,0.03);
+  background: rgba(70, 70, 70, 0.9);
   padding: 6px 8px;
   border-radius: 10px;
-  min-width: 36px;
+  min-width: 2em;
   user-select: none;
   transition: background-color 0.2s ease;
 }
 
-.vote-key.flash-blue   { background-color: color-mix(in srgb, var(--color-blue) 60%, white); }
-.vote-key.flash-red    { background-color: color-mix(in srgb, var(--color-red) 60%, white); }
-.vote-key.flash-green  { background-color: color-mix(in srgb, var(--color-green) 60%, white); }
-.vote-key.flash-yellow { background-color: color-mix(in srgb, var(--color-yellow) 70%, white); }
-.vote-key.flash-orange { background-color: color-mix(in srgb, var(--color-orange) 70%, white); }
+.vote-key.flash-choice-1   { background-color: color-mix(in srgb, var(--color-choice-1) 60%, white); }
+.vote-key.flash-choice-2    { background-color: color-mix(in srgb, var(--color-choice-2) 60%, white); }
+.vote-key.flash-choice-3  { background-color: color-mix(in srgb, var(--color-choice-3) 60%, white); }
+.vote-key.flash-choice-4 { background-color: color-mix(in srgb, var(--color-choice-4) 70%, white); }
+.vote-key.flash-choice-5 { background-color: color-mix(in srgb, var(--color-choice-5) 70%, white); }
 
-.vote-key.flash-blue,
-.vote-key.flash-red,
-.vote-key.flash-green,
-.vote-key.flash-yellow,
-.vote-key.flash-orange {
+.vote-key.flash-choice-1,
+.vote-key.flash-choice-2,
+.vote-key.flash-choice-3,
+.vote-key.flash-choice-4,
+.vote-key.flash-choice-5 {
   transform: translate(1px, 1px) scale(0.96);
 }
 
@@ -211,6 +211,7 @@ body::-webkit-scrollbar-thumb:hover {
 .choice-main {
   display: flex;
   flex-direction: column;
+  gap: 5px;
 }
 
 .choice-text {
@@ -228,8 +229,8 @@ body::-webkit-scrollbar-thumb:hover {
 
 .gauge {
   margin-top: 6px;
-  height: 7px;
-  background: rgba(255,255,255,0.04);
+  height: 0.4em;
+  background: rgba(70, 70, 70, 0.9);
   border-radius: 999px;
   overflow: hidden;
   position: relative;
@@ -242,11 +243,11 @@ body::-webkit-scrollbar-thumb:hover {
   transition: width 0.5s ease;
 }
 
-.gauge-fill.blue { background: var(--color-blue); }
-.gauge-fill.red { background: var(--color-red); }
-.gauge-fill.green { background: var(--color-green); }
-.gauge-fill.yellow { background: var(--color-yellow); }
-.gauge-fill.orange { background: var(--color-orange); }
+.gauge-fill.choice-1 { background: var(--color-choice-1); }
+.gauge-fill.choice-2 { background: var(--color-choice-2); }
+.gauge-fill.choice-3 { background: var(--color-choice-3); }
+.gauge-fill.choice-4 { background: var(--color-choice-4); }
+.gauge-fill.choice-5 { background: var(--color-choice-5); }
 
 .choice-right {
   display: flex;
@@ -505,11 +506,11 @@ margin: auto;
 }
 
 /* Color overrides for the config-page version of the gauges */
-.gauge-fill.config-page.blue { background-color: var(--color-blue); opacity: 0.5; }
-.gauge-fill.config-page.red { background-color: var(--color-red); opacity: 0.5; }
-.gauge-fill.config-page.green { background-color: var(--color-green); opacity: 0.5; }
-.gauge-fill.config-page.yellow { background-color: var(--color-yellow); opacity: 0.5; }
-.gauge-fill.config-page.orange { background-color: var(--color-orange); opacity: 0.5; }
+.gauge-fill.config-page.choice-1 { background-color: var(--color-choice-1); opacity: 0.5; }
+.gauge-fill.config-page.choice-2 { background-color: var(--color-choice-2); opacity: 0.5; }
+.gauge-fill.config-page.choice-3 { background-color: var(--color-choice-3); opacity: 0.5; }
+.gauge-fill.config-page.choice-4 { background-color: var(--color-choice-4); opacity: 0.5; }
+.gauge-fill.config-page.choice-5 { background-color: var(--color-choice-5); opacity: 0.5; }
 
 /* When poll is ACTIVE (we will toggle this class via JS) */
 /* Update this block in your CSS */

@@ -215,7 +215,7 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
   const choicesContainer = document.querySelector(".choices");
   choicesContainer.innerHTML = ""; // Clear existing choices
 
-  const colors = ["blue", "red", "green", "yellow", "orange"];
+  const colors = ["choice-1", "choice-2", "choice-3", "choice-4", "choice-5"];
 
   for (let i = 0; i < numberOfChoices; i++) {
     const choiceDiv = document.createElement("div");
@@ -323,7 +323,7 @@ function castVote(choiceIndex) {
   votes[choiceIndex]++;
 
   const voteKey = document.querySelectorAll('.vote-key')[choiceIndex];
-  const colors = ["flash-blue", "flash-red", "flash-green", "flash-yellow", "flash-orange"];
+  const colors = ["flash-choice-1", "flash-choice-2", "flash-choice-3", "flash-choice-4", "flash-choice-5"];
 
   // remove any previous flash
   voteKey.classList.remove(...colors);
