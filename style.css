@@ -124,6 +124,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .poll-card {
+  font-size: 18px;
   background: var(--card-bg);
   border-radius: var(--card-radius);
   padding: var(--card-pad);
@@ -145,10 +146,6 @@ body::-webkit-scrollbar-thumb:hover {
   width: 100%; /* will shrink with time */
   pointer-events: none; /* clicks go through */
   transition: width 1s linear; /* smooth shrink */
-}
-
-.poll-card {
-  font-size: 16px;
 }
 
 .title {
@@ -460,7 +457,6 @@ margin: auto;
   transform: scale(1.02);
   transition: transform 0.3s ease, filter 0.3s ease;
   z-index: 10; /* Ensure it pops above others */
-  border: 2px solid gold; /* Optional: adds a "winning" border */
 }
 
 .choice-container.loser {
@@ -487,8 +483,6 @@ margin: auto;
   gap: 10px;
   font-size: 0.85em;
 }
-
-/* 2. STATE LOGIC: Hiding/Fading based on .poll-active */
 
 /* Default: Hide stats and gauge when poll is NOT running */
 #choices-group .choice-stats {
@@ -521,6 +515,7 @@ margin: auto;
 /* Update this block in your CSS */
 #choices-group.poll-active .choice-stats {
   opacity: 1; /* Force visibility for testing */
+  font-weight: 500;
 }
 
 #choices-group.poll-active .gauge-fill.config-page {
@@ -540,11 +535,10 @@ margin: auto;
 
 /* Lock inputs during the poll so you don't accidentally type while people vote */
 #choices-group.poll-active .choice-input {
+  font-weight: bold;
   pointer-events: none;
   cursor: default;
 }
-
-
 
 .choice-header {
   display: flex;
