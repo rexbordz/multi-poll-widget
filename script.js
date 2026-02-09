@@ -23,31 +23,10 @@ let votedUsers = new Map();
 let maxChoices = 5; // default, can be updated per poll
 let pollSessionId = 0;
 
-let pollInstanceCounter = 0;
-
-function logPoll(msg, extra = {}) {
-  console.debug(
-    `%c[POLL] ${msg}`,
-    "color:#4caf50;font-weight:bold",
-    {
-      session: pollSessionId,
-      instance: pollInstanceCounter,
-      ...extra
-    }
-  );
-}
-
 // Settings Page Listener
 const channel = new BroadcastChannel('rexbordzPollWidget');
 
 channel.onmessage = (e) => {
-  console.debug(
-    "%c[BC]",
-    "color:#ff9800;font-weight:bold",
-    e.data,
-    "session:",
-    pollSessionId
-  );
   console.debug('📡 BroadcastChannel received data:', e.data);
   const data = e.data;
 
@@ -218,13 +197,6 @@ function createToast(type, icon, title, text, source){
 // Each object in choicesArray should have at least a `text` property
 function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to vote", duration = pollDuration) {
   pollSessionId++;
-  pollInstanceCounter++;
-
-  logPoll("CREATE poll", {
-    title: pollTitle,
-    duration
-  });
-  const currentSession = pollSessionId;
 
   const numberOfChoices = choicesArray.length;
 
@@ -282,8 +254,6 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
 }
 
 function startPollTimer() {
-  logPoll("START timer", { duration: pollDuration });
-
   clearTimeout(pollTimer); // stop any previous auto-reset
   clearInterval(countdownInterval); // Clear any existing timer first!
 
@@ -325,15 +295,8 @@ function startPollTimer() {
   overlay.style.width = "0%";
 
   const sessionAtStart = pollSessionId;
-    logPoll("ARM transitionend listener", {
-    sessionAtStart
-  });
 
   const handler = (event) => {
-    logPoll("TRANSITION END fired", {
-      sessionAtStart,
-      currentSession: pollSessionId
-    });
     if (event.propertyName !== "width") return;
 
     // ❌ Old poll — ignore completely
@@ -513,7 +476,6 @@ function showPoll() {
 }
 
 function endPoll() {
-  logPoll("END poll clicked manually");
   const overlay = document.querySelector(".poll-timer-overlay");
 
   // STOP THE CLOCK
