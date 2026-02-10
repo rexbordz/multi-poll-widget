@@ -1,3 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Black.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Black.woff') format('woff');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Bold.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Medium.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'URW DIN';
+  src: url('assets/fonts/URWDIN-Regular.woff2') format('woff2'),
+       url('assets/fonts/URWDIN-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
 /* Your custom variables */
 :root {
   --card-bg: rgba(23, 23, 23, 0.98);
@@ -61,6 +95,7 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'URW DIN';
   font-weight: 900; /* matches the font-face weight */
   font-size: 1.6em;
   gap: 10px;
