@@ -1,43 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-
-@font-face {
-  font-family: 'URW DIN';
-  src: url('assets/fonts/URWDIN-Black.woff2') format('woff2'),
-       url('assets/fonts/URWDIN-Black.woff') format('woff');
-  font-weight: 900;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'URW DIN';
-  src: url('assets/fonts/URWDIN-Bold.woff2') format('woff2'),
-       url('assets/fonts/URWDIN-Bold.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'URW DIN';
-  src: url('assets/fonts/URWDIN-Medium.woff2') format('woff2'),
-       url('assets/fonts/URWDIN-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'URW DIN';
-  src: url('assets/fonts/URWDIN-Regular.woff2') format('woff2'),
-       url('assets/fonts/URWDIN-Regular.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
-}
-
+/* Your custom variables */
 :root {
-  --card-bg: rgba(23, 23, 23, 0.98); /* dark semi-transparent background */
+  --card-bg: rgba(23, 23, 23, 0.98);
   --card-radius: 24px;
   --card-pad: 25px;
   --card-shadow: 0 4px 10px rgba(0,0,0,0.4);
 
+  --font: 'InterVariable', 'Inter', sans-serif;
+  --font-size: 18px;
   --text-color: #fff;
   --muted: rgba(255,255,255,0.6);
 
@@ -46,14 +15,17 @@
   --color-choice-3: #22c55e;
   --color-choice-4: #eab308;
   --color-choice-5: #f97316;
-  --font-size: 18px;
+}
+
+html, body, * {
+  font-family: var(--font);
+  font-feature-settings: 'liga' 1, 'calt' 1;
 }
 
 html {
   height: 100%;
   margin: 0;
   background: transparent;
-  font-family: Inter, system-ui, sans-serif;
   color: var(--text-color);
 }
 
@@ -63,7 +35,6 @@ body {
   overflow-x: hidden; /* prevent horizontal scroll */
   overflow-y: auto;   /* allow vertical scroll */
   background-color: #181818;
-  font-family: Inter, Roboto, system-ui, sans-serif;
 }
 
 /* Modern dark scrollbar */
@@ -90,7 +61,6 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: 'URW DIN', sans-serif;
   font-weight: 900; /* matches the font-face weight */
   font-size: 1.6em;
   gap: 10px;
@@ -150,7 +120,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 .title {
   text-align: center;
-  font-size: 1.3em;
+  font-size: 1.5em;
   font-weight: bold;
   user-select: none;
 }
@@ -207,7 +177,6 @@ body::-webkit-scrollbar-thumb:hover {
   transform: translate(1px, 1px) scale(0.96);
 }
 
-
 .choice-main {
   display: flex;
   flex-direction: column;
@@ -219,6 +188,7 @@ body::-webkit-scrollbar-thumb:hover {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 .choice-label {
@@ -256,16 +226,17 @@ body::-webkit-scrollbar-thumb:hover {
   font-weight: 500;
 }
 
+
+.votes {
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .percent {
   font-weight: 600;
 }
 
-.votes {
-  color: var(--muted);
-}
-
 .notifications {
-  font-family: 'URW DIN', sans-serif;
   position: fixed;
   bottom: 40px;       /* distance from bottom of screen */
   left: 50%;           /* center horizontally */
@@ -289,7 +260,6 @@ body::-webkit-scrollbar-thumb:hover {
   background: #202022;
   animation: show 0.3s ease 1 forwards;
 }
-
 
 .toast i{
   color: var(--color);
@@ -331,7 +301,6 @@ body::-webkit-scrollbar-thumb:hover {
     transform: translateY(-10%);
   }
 }
-
 
 .toast::before{
   position: absolute;
@@ -392,7 +361,6 @@ margin: auto;
   box-sizing: border-box; /* include padding in width */
 }
 
-
 .settings-container h1 {
   text-align: center;
   font-size: 1.5em;
@@ -407,7 +375,7 @@ margin: auto;
 }
 
 .input-group label {
-  font-weight: 500;
+  font-weight: bold;
   font-size: 0.95em;
 }
 
@@ -430,11 +398,9 @@ margin: auto;
   box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); /* optional subtle glow */
 }
 
-
 .input-group input::placeholder {
   color: #696969;
 }
-
 
 .choice-container {
   position: relative;
@@ -450,7 +416,6 @@ margin: auto;
   opacity: 1;
   transition: max-height 0.5s ease, margin 0.5s ease-in-out, opacity 0.4s ease, transform 0.5s ease-in-out;
 }
-
 
 /* Winner effect in settings */
 .choice-container.winner {
@@ -522,7 +487,6 @@ margin: auto;
 #choices-group.poll-active .gauge-fill.config-page {
   visibility: visible;
 }
-
 
 /* Auto-hide containers with empty inputs when poll is active */
 /* 2. THE SMOOTH HIDE: Replace your display:none logic with this */

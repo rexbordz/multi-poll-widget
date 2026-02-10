@@ -176,7 +176,6 @@ resetBtn.addEventListener('click', () => {
  * Broadcast event listeners
  */
 
-// Optional: reset button when poll ends automatically
 channel.onmessage = (e) => {
   const data = e.data;
 
@@ -192,7 +191,8 @@ channel.onmessage = (e) => {
         const percentEl = container.querySelector('.percentage');
         const gaugeEl = container.querySelector('.gauge-fill');
 
-        if (votesEl) votesEl.textContent = `${stat.votes} votes`;
+        const votePluralized = stat.votes !== 1 ? "votes" : "vote";
+        if (votesEl) votesEl.textContent = `${stat.votes} ${votePluralized}`;
         if (percentEl) percentEl.textContent = `${stat.percentage}%`;
         if (gaugeEl) gaugeEl.style.width = `${stat.percentage}%`;
       }
@@ -231,7 +231,7 @@ channel.onmessage = (e) => {
 
     // LOCK BUTTON: Sync the button UI even if the timer ended it
     startEndBtn.disabled = true;
-    startEndBtn.textContent = 'Showing Results...';
+    startEndBtn.textContent = 'Closing Poll...';
     startEndBtn.style.opacity = "0.5";
     startEndBtn.style.cursor = "not-allowed";
     startEndBtn.style.backgroundColor = '#af221dff'; 
@@ -295,7 +295,6 @@ channel.onmessage = (e) => {
   if (data.action === 'startEndBtn') {
     startEndPoll(); 
   }
-  
 };
 
 

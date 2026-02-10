@@ -287,9 +287,6 @@ function startPollTimer() {
   overlay.style.transition = "none";
   overlay.style.width = "100%";
 
-  // Force reflow so that transition applies correctly
-  void overlay.offsetWidth;
-
   // Start smooth transition over the poll duration
   overlay.style.transition = `width ${pollDuration}s linear`;
   overlay.style.width = "0%";
@@ -368,7 +365,8 @@ function updatePoll() {
 
     choice.querySelector(".percent").textContent = `${roundedPercent}%`;
     choice.querySelector(".gauge-fill").style.width = `${roundedPercent}%`;
-    choice.querySelector(".votes").textContent = `(${voteCount} votes)`;
+    const votePluralized = voteCount !== 1 ? "votes" : "vote";
+    choice.querySelector(".votes").textContent = `(${voteCount} ${votePluralized})`;
 
     // 4. Add live data to the sync array
     pollStats.push({
