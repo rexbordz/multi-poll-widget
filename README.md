@@ -42,7 +42,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
   > **[Click here to be a paid member](https://www.patreon.com/rexbordz)**
   
   > [!TIP]
-  > I recommend setting the **height** to at least **370** (**740** for the pro version) to make sure there’s enough space for the poll. The width is stretchable so you can set it to whatever.
+  > Make sure to set the height so that there's enough space for the poll with 5 choices at most. The width is stretchable so you can set it to whatever.
 
 4. Add the **MultiPoll Widget Settings Page** as a **Custom Browser Dock** to your streaming software of choice. 
     
@@ -115,9 +115,10 @@ You can kind of customize the widget by adding these parameters at the end of th
 So with custom settings, your browser source link should look like this:
 
 `widget-link.com?alignRight=false?address=127.0.0.2?port=8081`
+
 ### 🎨 Customizing the Overlay
 
-Copy and paste this to the source’s custom CSS and adjust the values. I made the variable names self-explanatory so I don’t need to explain what they all change:
+Copy and paste this to the source’s **custom CSS** and adjust the values. I made the variable names self-explanatory so I don’t need to explain what they all change:
 
 ```xml
 :root {
@@ -126,9 +127,10 @@ Copy and paste this to the source’s custom CSS and adjust the values. I made t
   --card-pad: 25px;
   --card-shadow: 0 4px 10px rgba(0,0,0,0.4);
 
-  --text-color: #fff;
+  --font: 'InterVariable', 'Inter', sans-serif;
   --font-size: 18px;
-
+  --text-color: #fff;
+  
   --color-choice-1: #3b82f6;
   --color-choice-2: #ef4444;
   --color-choice-3: #22c55e;
@@ -137,9 +139,8 @@ Copy and paste this to the source’s custom CSS and adjust the values. I made t
 }
 ```
 <p align="center">
-    <img width="896" height="1015" alt="image" src="https://github.com/user-attachments/assets/24b9844a-ea1b-44e7-af0d-1a5c271efcde" />
+    <img width="893" height="1013" alt="image" src="https://github.com/user-attachments/assets/30d82eaa-c07e-4f52-809f-38384ced13c5" />
 </p>
-
 ---
 
 ## 💝 Donate
