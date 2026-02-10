@@ -115,6 +115,30 @@ You can kind of customize the widget by adding these parameters at the end of th
 So with custom settings, your browser source link should look like this:
 
 `widget-link.com?alignRight=false?address=127.0.0.2?port=8081`
+### 🎨 Customizing the Overlay
+
+Copy and paste this to the source’s custom CSS and adjust the values. I made the variable names self-explanatory so I don’t need to explain what they all change:
+
+```xml
+:root {
+  --card-bg: rgba(23, 23, 23, 0.98);
+  --card-radius: 24px;
+  --card-pad: 25px;
+  --card-shadow: 0 4px 10px rgba(0,0,0,0.4);
+
+  --text-color: #fff;
+  --font-size: 18px;
+
+  --color-choice-1: #3b82f6;
+  --color-choice-2: #ef4444;
+  --color-choice-3: #22c55e;
+  --color-choice-4: #eab308;
+  --color-choice-5: #f97316;
+}
+```
+<p align="center">
+    <img width="896" height="1015" alt="image" src="https://github.com/user-attachments/assets/24b9844a-ea1b-44e7-af0d-1a5c271efcde" />
+</p>
 
 ---
 
