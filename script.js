@@ -13,7 +13,7 @@ let tikfinityConnected = false;
 let notifications = document.querySelector('.notifications');
 const BotMessageActionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860";
 
-// Poll state
+// Global Poll Variable
 let votes; // for 5 choices max
 let pollTimer = null;      
 let countdownInterval;
@@ -22,6 +22,9 @@ let isPollActive = false;
 let votedUsers = new Map();
 let maxChoices = 5; // default, can be updated per poll
 let pollSessionId = 0;
+let currentPollTitle = "";
+let currentPollChoices = [];
+let requeuedAction = false;
 
 // Settings Page Listener
 const channel = new BroadcastChannel('rexbordzPollWidget');
@@ -99,6 +102,7 @@ sbClient.on('YouTube.Message', (response) => {
 sbClient.on('Raw.Action', (response) => {
   console.debug('📢 Action Executed:', response);
   const actionId = response.data.actionId;
+  const data = response.data;
   
   switch (actionId) {
     case "8413040f-ee21-439d-be53-b44f55d35998":
@@ -115,6 +119,38 @@ sbClient.on('Raw.Action', (response) => {
     case "705bae3a-36f1-4f42-9bb1-110c8bc5feb7":
       console.debug("Action Executed: MultiPoll Widget • [Trigger] Toggle Poll ");
       togglePoll();
+      break;
+
+    case "4c16514d-8672-4c36-823e-ce11219a3bdb":
+      console.debug("Action Executed: MultiPoll Widget • Poll Started", data);
+      const args = data.arguments;
+      if (!args.requeuedAction) { 
+        return;
+      }
+      
+      requeuedAction = true;
+      let parsedChoices = [];
+      try {
+        // If it's a string, parse it. If it's somehow already an object, use it.
+        parsedChoices = typeof args.choicesArray === 'string' 
+          ? JSON.parse(args.choicesArray) 
+          : args.choicesArray;
+      } catch (e) {
+        console.error("Failed to parse choicesArray:", e);
+        parsedChoices = []; 
+      }
+
+      createPoll(parsedChoices, args.pollTitle, args.pollDuration);
+      showPoll();
+
+      // ⚡ BROADCAST TO SETTINGS.JS
+      // We send a new action 'syncRequeue' so settings.js knows to update its inputs
+      channel.postMessage({
+        action: 'syncRequeue',
+        title: args.pollTitle,
+        choicesArray: parsedChoices,
+        duration: args.pollDuration
+      });
       break;
 
     default:
@@ -198,6 +234,8 @@ function createToast(type, icon, title, text, source){
 function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to vote", duration = pollDuration) {
   pollSessionId++;
 
+  currentPollTitle = pollTitle;
+  currentPollChoices = choicesArray; 
   const numberOfChoices = choicesArray.length;
 
   votes = new Array(numberOfChoices).fill(0);
@@ -243,14 +281,34 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
     choicesContainer.appendChild(choiceDiv);
   }
 
-  // Reset votes array to match number of choices
-  votes = new Array(numberOfChoices).fill(0);
-  updatePoll();
-  startPollTimer();
+  // 🔹 FIX: Only start the timer if duration is NOT "permanent"
+  if (duration !== "permanent" && duration > 0) {
+    startPollTimer();
+  } else {
+    // Optional: Explicitly hide the timer element if it exists in your UI
+    const timerDisplay = document.querySelector(".time-remaining");
+    if (timerDisplay) timerDisplay.textContent = ""; 
+  }
 
-  // Execute Poll Created Bot Message SB Action
-  const message = `GLOBAL POLL STARTED! • ${pollTitle}`;
-  sendMessageToPlatforms(BotMessageActionId, message);
+  // Run Streamer.bot Action: MultiPoll Widget • Poll Started
+  // Send the args below as well
+  const choices = Array.isArray(choicesArray) 
+    ? choicesArray.map(c => c.text || c.value || "") 
+    : [];
+
+  let args = {
+    "pollTitle": pollTitle,
+    "pollDuration": duration,
+    "numChoices": numberOfChoices,
+    "choicesArray": JSON.stringify(choicesArray),
+  };
+
+  args = addChoicesToArgs(args, choicesArray);
+
+  if (!requeuedAction) {
+    sbClient.doAction("4c16514d-8672-4c36-823e-ce11219a3bdb", args);
+  }
+  
 }
 
 function startPollTimer() {
@@ -286,6 +344,9 @@ function startPollTimer() {
   // Reset overlay instantly
   overlay.style.transition = "none";
   overlay.style.width = "100%";
+
+  // Force reflow so that transition applies correctly
+  void overlay.offsetWidth;
 
   // Start smooth transition over the poll duration
   overlay.style.transition = `width ${pollDuration}s linear`;
@@ -349,7 +410,7 @@ function updatePoll() {
       choice.querySelector(".votes").textContent = `(0 votes)`;
       
       // 2. Add 0% data to the sync array
-      pollStats.push({ index: i, votes: 0, percentage: 0 });
+      pollStats.push({ index: i, votes: 0, percent: 0 });
     });
     
     // 3. Broadcast empty state to settings
@@ -372,7 +433,7 @@ function updatePoll() {
     pollStats.push({
       index: i,
       votes: voteCount,
-      percentage: roundedPercent
+      percent: roundedPercent
     });
   });
 
@@ -385,55 +446,76 @@ function updatePoll() {
 
 
 function highlightWinner() {
-  let pollResults;
+  let pollResults = "";
   let winners = []; 
   let maxVotes = 0;
+  let winnerArray = [];
+  let voteCount = 0;
+  let winnerPercent = "0%";
 
   const choices = document.querySelectorAll(".choice");
 
-  // 1. Calculate Results
   if (!votes || votes.length === 0 || Math.max(...votes) === 0) {
-    pollResults = "POLL RESULTS ARE HERE! • NOBODY voted. . . LOL";
-    // Don't return! Let it flow to the bottom so we can tell settings to reset.
+    pollResults = "NOBODY voted. . . LOL";
   } else {
-    maxVotes = Math.max(...votes); // Removed "const"
-    winners = votes                // Removed "const"
+    maxVotes = Math.max(...votes);
+    winners = votes
       .map((v, i) => v === maxVotes ? i : -1)
       .filter(i => i !== -1);
 
-    // clear classes first
     choices.forEach(choice => choice.classList.remove("winner", "loser"));
 
     if (winners.length === votes.length) {
-      pollResults = "POLL RESULTS ARE HERE! • It's a TIE. GG";
+      pollResults = "It's a TIE. GG";
     } else {
-      // highlight winners, mark others as losers
       choices.forEach((choice, i) => {
         if (winners.includes(i)) choice.classList.add("winner");
         else choice.classList.add("loser");
       });
 
-      const winnerTexts = winners.map(i =>
-        `"${choices[i].querySelector(".choice-text")?.textContent.trim()}"`
-      ).filter(Boolean);
+      // --- CLEAN WINNER ARRAY LOGIC ---
+      winnerArray = winners.map(i => {
+        const text = choices[i].querySelector(".choice-text")?.textContent || "";
+        return text.replace(/[^a-zA-Z0-9 ]/g, "").trim();
+      }).filter(Boolean);
 
-      const winnerTextsFormatted = winnerTexts.length > 1
-        ? winnerTexts.slice(0, -1).join(", ") + " and " + winnerTexts.slice(-1)
-        : winnerTexts[0] || "";
+      // Create a formatted string for the pollResults message
+      const winnerTextFormatted = winnerArray.length > 1
+        ? winnerArray.slice(0, -1).join(", ") + " and " + winnerArray.slice(-1)
+        : winnerArray[0] || "";
 
-      let winnerVotes = (choices[winners[0]]?.querySelector(".votes")?.textContent.trim() || "0 votes").replace(/[()]/g, "");
-      const winnerPercent = choices[winners[0]]?.querySelector(".percent")?.textContent.trim() || "0%";
-      const voteCount = parseInt(winnerVotes, 10);
-      if (!isNaN(voteCount)) {
-        winnerVotes = `${voteCount} ${voteCount === 1 ? "vote" : "votes"}`;
-      }
-
-      pollResults = `POLL RESULTS ARE HERE! • ${winnerTextsFormatted} with ${winnerVotes} (${winnerPercent}).`;
+      let rawVotes = (choices[winners[0]]?.querySelector(".votes")?.textContent.trim() || "0").replace(/[()]/g, "");
+      winnerPercent = choices[winners[0]]?.querySelector(".percent")?.textContent.trim() || "0%";
+      voteCount = parseInt(rawVotes, 10);
+      
+      const voteLabel = voteCount === 1 ? "vote" : "votes";
+      pollResults = `${winnerTextFormatted} with ${voteCount} ${voteLabel} (${winnerPercent}).`;
     }
   }
 
-  // 2. Send Bot Message
-  sendMessageToPlatforms(BotMessageActionId, pollResults);
+  const totalVotes = votes.reduce((sum, current) => sum + current, 0);
+
+  // Start with the "Header" info
+  let args = {
+    "pollTitle": currentPollTitle,
+    "pollDuration": pollDuration,
+    "choicesArray": JSON.stringify(currentPollChoices), // Stringify here for the Bot
+  };
+
+  // Inject choices0, choices1, etc. RIGHT HERE
+  // This ensures they follow choicesArray in the object key order
+  args = addChoicesToArgs(args, currentPollChoices);
+
+  // 3. Add the "Results" data to the end of the object
+  Object.assign(args, {
+    "winner": winnerArray.join(", "),
+    "numVotes": voteCount,
+    "percent": winnerPercent,
+    "pollResults": pollResults,
+    "totalVotes": totalVotes,
+  });
+
+  sbClient.doAction("e5a8fac6-f58e-4344-88eb-9bd13be4ab2e", args);
 
   // 3. Send the winner to config page (The Handshake)
   channel.postMessage({
@@ -464,6 +546,20 @@ function onChatMessage(username, message, platform) {
   console.debug(`${username} (${platform}) voted ${message}`);
 }
 
+/**
+ * Utility to flatten an array into choice0, choice1, etc. keys in an object
+ */
+function addChoicesToArgs(targetArgs, choiceList) {
+  if (!Array.isArray(choiceList)) return targetArgs;
+  
+  choiceList.forEach((choice, index) => {
+    // If choice is an object {text: '...'}, get the text. Otherwise, use it directly.
+    const choiceText = typeof choice === 'object' ? choice.text : choice;
+    targetArgs[`choice${index}`] = choiceText;
+  });
+  
+  return targetArgs;
+}
 
 function sendMessageToPlatforms(actionId, message) {
   sbClient.doAction(actionId, {"message" : message});

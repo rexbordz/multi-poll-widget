@@ -188,13 +188,13 @@ channel.onmessage = (e) => {
       const container = containers[i];
       if (container) {
         const votesEl = container.querySelector('.votes');
-        const percentEl = container.querySelector('.percentage');
+        const percentEl = container.querySelector('.percent');
         const gaugeEl = container.querySelector('.gauge-fill');
 
         const votePluralized = stat.votes !== 1 ? "votes" : "vote";
         if (votesEl) votesEl.textContent = `${stat.votes} ${votePluralized}`;
-        if (percentEl) percentEl.textContent = `${stat.percentage}%`;
-        if (gaugeEl) gaugeEl.style.width = `${stat.percentage}%`;
+        if (percentEl) percentEl.textContent = `${stat.percent}%`;
+        if (gaugeEl) gaugeEl.style.width = `${stat.percent}%`;
       }
     });
   }
@@ -294,6 +294,24 @@ channel.onmessage = (e) => {
 
   if (data.action === 'startEndBtn') {
     startEndPoll(); 
+  }
+
+  if (data.action === 'syncRequeue') {
+    // 1. Fill the inputs so the UI matches the actual poll
+    pollTitleInput.value = data.title;
+    
+    const inputs = document.querySelectorAll('.choice-input');
+    data.choicesArray.forEach((choice, i) => {
+      if (inputs[i]) inputs[i].value = choice.text;
+    });
+
+    // 2. Update the button visuals without re-triggering the 'Start' logic
+    document.querySelector('#choices-group')?.classList.add('poll-active');
+    startEndBtn.textContent = 'End Poll';
+    startEndBtn.style.backgroundColor = '#af221dff';
+    startEndBtn.disabled = false;
+    startEndBtn.style.opacity = "1";
+    startEndBtn.style.cursor = "pointer";
   }
 };
 
