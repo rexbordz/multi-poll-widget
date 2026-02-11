@@ -32,23 +32,21 @@ const toggleBtn = document.querySelector('#toggle-poll');
 const resetBtn = document.querySelector('#reset-poll');
 
 // === Persistent Form Storage ===
-const inputGroups = document.querySelectorAll('.input-group input, .input-group select');
+const allInputs = document.querySelectorAll('#poll-title, .choice-input, #duration-dropdown, #duration-input');
 
-// Load saved values
-inputGroups.forEach(field => {
-  const savedValue = localStorage.getItem(`poll-${field.id || field.className}-${field.name || ''}-${[...field.parentElement.children].indexOf(field)}`);
+allInputs.forEach((field, index) => {
+  // Use the ID if it exists, otherwise use the index to ensure a unique key
+  const storageKey = `poll-field-${field.id || index}`;
+  
+  // 1. Load saved values
+  const savedValue = localStorage.getItem(storageKey);
   if (savedValue !== null) {
     field.value = savedValue;
   }
-});
 
-// Save values on change/input
-inputGroups.forEach(field => {
+  // 2. Save on every input change
   field.addEventListener('input', () => {
-    localStorage.setItem(
-      `poll-${field.id || field.className}-${field.name || ''}-${[...field.parentElement.children].indexOf(field)}`,
-      field.value
-    );
+    localStorage.setItem(storageKey, field.value);
   });
 });
 
