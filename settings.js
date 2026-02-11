@@ -297,7 +297,7 @@ channel.onmessage = (e) => {
   }
 
   if (data.action === 'syncRequeue') {
-    // 1. Fill the inputs so the UI matches the actual poll
+    // Fill the inputs so the UI matches the actual poll
     pollTitleInput.value = data.title;
     
     const inputs = document.querySelectorAll('.choice-input');
@@ -305,7 +305,23 @@ channel.onmessage = (e) => {
       if (inputs[i]) inputs[i].value = choice.text;
     });
 
-    // 2. Update the button visuals without re-triggering the 'Start' logic
+    // Sync Duration UI
+    const incomingDuration = String(data.duration); // Ensure string for comparison
+    
+    // Check if the duration exists as an option in the dropdown
+    const hasMatch = Array.from(durationDropdown.options).some(opt => opt.value === incomingDuration);
+
+    if (hasMatch) {
+      durationDropdown.value = incomingDuration;
+      durationInput.value = ""; // Clear manual input since it's a standard option
+      lastSelectedDuration = incomingDuration; // Update your "remembered" choice
+    } else {
+      durationDropdown.value = 'custom';
+      durationInput.value = incomingDuration;
+      // lastSelectedDuration stays as it was (e.g., 60) so it can revert later
+    }
+
+    // Update the button visuals without re-triggering the 'Start' logic
     document.querySelector('#choices-group')?.classList.add('poll-active');
     startEndBtn.textContent = 'End Poll';
     startEndBtn.style.backgroundColor = '#af221dff';
