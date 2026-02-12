@@ -1,8 +1,8 @@
 // Settings configuration
 const urlParams = new URLSearchParams(window.location.search);
-const sbAddress = urlParams.get("address") || "127.0.0.1";
-const sbPort = urlParams.get("port") || "8080";
-const sbPassword = urlParams.get("password"); 
+let sbAddress = "127.0.0.1";
+let sbPort = "8080";
+let sbPassword = ""; 
 
 // Global variables
 const streamerbot = "streamerbot";
@@ -32,6 +32,23 @@ const channel = new BroadcastChannel('rexbordzPollWidget');
 channel.onmessage = (e) => {
   console.debug('📡 BroadcastChannel received data:', e.data);
   const data = e.data;
+
+  if (data.type === 'CONNECTION_SUCCESS') {
+    sbAddress = data.address;
+    sbPort = data.port;
+    sbPassword = data.password;
+    
+    console.debug(`🚀 Streamer.bot connection updated with these credentials: ${sbAddress}:${sbPort}`);
+
+    sbClient.updateOptions({
+      host: sbAddress,
+      port: sbPort,
+      password: sbPassword
+    });
+
+    // 3. Trigger a reconnect attempt with the new settings
+    sbClient.connect();
+  }
 
   // 1. Check for Poll Creation
   if (data.choicesArray && data.choicesArray.length >= 2) {
