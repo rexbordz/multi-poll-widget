@@ -532,7 +532,7 @@ function renderActionsList() {
 
     row.innerHTML = `
       <span>${action.name}</span>
-      <span class="status not-found">✖ Not Found</span>
+      <span class="status not-found">✖</span>
     `;
 
     list.appendChild(row);
@@ -598,10 +598,10 @@ function paintActionRows() {
 
     if (isValid) {
       statusEl.classList.add("found");
-      statusEl.textContent = "✔ Found";
+      statusEl.textContent = "✔";
     } else {
       statusEl.classList.add("not-found");
-      statusEl.textContent = "✖ Not Found";
+      statusEl.textContent = "✖";
     }
   });
 }
