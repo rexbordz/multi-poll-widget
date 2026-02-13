@@ -1,18 +1,3 @@
-// Settings configuration
-const urlParams = new URLSearchParams(window.location.search);
-let sbAddress = "127.0.0.1";
-let sbPort = "8080";
-let sbPassword = ""; 
-
-// Global variables
-const streamerbot = "streamerbot";
-const tikfinity = "tikfinity";
-const widgetTitle = "MultiPoll Widget";
-let sbClientConnected = false;
-let tikfinityConnected = false;
-let notifications = document.querySelector('.notifications');
-const BotMessageActionId = "3e52314f-28bd-4d86-b0e0-3b5d665d7860";
-
 // Global Poll Variable
 let votes; // for 5 choices max
 let pollTimer = null;      
@@ -26,37 +11,135 @@ let currentPollTitle = "";
 let currentPollChoices = [];
 let requeuedAction = false;
 
-// Settings Page Listener
+// =============================
+// Dashboard Listener
+// =============================
 const channel = new BroadcastChannel('rexbordzPollWidget');
 
 channel.onmessage = (e) => {
-  console.debug('📡 BroadcastChannel received data:', e.data);
+  // console.debug('📡 BroadcastChannel received data:', e.data);
   const data = e.data;
 
-  if (data.type === 'CONNECTION_SUCCESS') {
-    sbAddress = data.address;
-    sbPort = data.port;
-    sbPassword = data.password;
-    
-    console.debug(`🚀 Streamer.bot connection updated with these credentials: ${sbAddress}:${sbPort}`);
+  // Streamer.bot Listener
+  if (data?.type === 'SB_EVENT') {
+    const response = data.payload;
 
-    sbClient.updateOptions({
-      host: sbAddress,
-      port: sbPort,
-      password: sbPassword
-    });
+    switch (data.event) {
 
-    // 3. Trigger a reconnect attempt with the new settings
-    sbClient.connect();
+      case 'Twitch.ChatMessage': {
+        // console.debug('📢 New Twitch Chat:', response);
+        const chat = response.data;
+        const platform = response.event.source;
+        onChatMessage(chat.user.login, chat.message.message, platform);
+        return;
+      }
+
+      case 'Kick.ChatMessage': {
+        // console.debug('📢 New Kick Chat:', response);
+        const chat = response.data;
+        const platform = response.event.source;
+        onChatMessage(chat.user.login, chat.text, platform);
+        return;
+      }
+
+      case 'YouTube.Message': {
+        // console.debug('📢 New YouTube Chat:', response);
+        const chat = response.data;
+        const platform = response.event.source;
+        onChatMessage(chat.user.name, chat.message, platform);
+        return;
+      }
+
+      case 'Raw.Action': {
+        // console.debug('📢 Action Executed:', response);
+
+        const actionId = response?.data?.actionId;
+        const payload = response?.data;
+
+        switch (actionId) {
+
+          case "8413040f-ee21-439d-be53-b44f55d35998":
+            // console.debug("Action Executed: MultiPoll Widget • [Trigger] Clear");
+            resetPoll();
+            channel.postMessage({ action: 'reloadPage' });
+            return;
+
+          case "e14a127f-34f6-4091-ba06-a1eb4d387564":
+            // console.debug("Action Executed: MultiPoll Widget • [Trigger] Start/End Poll");
+            channel.postMessage({ action: 'startEndBtn' });
+            return;
+
+          case "705bae3a-36f1-4f42-9bb1-110c8bc5feb7":
+            // console.debug("Action Executed: MultiPoll Widget • [Trigger] Toggle Poll ");
+            togglePoll();
+            return;
+
+          case "4c16514d-8672-4c36-823e-ce11219a3bdb": {
+            // console.debug("Action Executed: MultiPoll Widget • Poll Started", payload);
+
+            const args = payload?.arguments || {};
+
+            // Only handle requeue
+            if (!args.requeuedAction) return;
+
+            requeuedAction = true;
+
+            let parsedChoices = [];
+            try {
+              parsedChoices = typeof args.choicesArray === 'string'
+                ? JSON.parse(args.choicesArray)
+                : (args.choicesArray || []);
+            } catch (e) {
+              console.error("Failed to parse choicesArray:", e);
+              parsedChoices = [];
+            }
+
+            createPoll(parsedChoices, args.pollTitle, args.pollDuration);
+            showPoll();
+
+            // Broadcast to settings.js
+            channel.postMessage({
+              action: 'syncRequeue',
+              title: args.pollTitle,
+              choicesArray: parsedChoices,
+              duration: args.pollDuration
+            });
+
+            return;
+          }
+
+          default:
+            // console.debug("Action ID not recognized:", actionId);
+            return;
+        }
+      }
+
+      default:
+        return; // Unknown SB event → ignore
+    }
   }
 
-  // 1. Check for Poll Creation
+  // Tikfinity Listener
+  if (data?.type === "TIKFINITY_EVENT" && data.source === "TikTok") {
+    switch (data.event) {
+      case "chat": {
+        const packet = data.payload;      // full TikFinity packet
+        const chat = packet?.data;        // TikFinity chat object
+        onChatMessage(chat.uniqueId, chat.comment, "TikTok");
+        return;
+      }
+      default:
+        return;
+    }
+  }
+
+  // Check for Poll Creation
   if (data.choicesArray && data.choicesArray.length >= 2) {
     createPoll(data.choicesArray, data.title, data.duration);
     showPoll();
   }
 
-  // 2. Handle Actions - ADD clearInterval here to kill the zombie timer instantly
+  // Handle Actions - ADD clearInterval here to kill the zombie timer instantly
   if (data.action === 'endPoll' || data.action === 'resetPoll') {
     // Kill the MM:SS timer immediately before doing anything else
     clearInterval(countdownInterval); 
@@ -68,186 +151,10 @@ channel.onmessage = (e) => {
   if (data.action === 'togglePoll') togglePoll();
 };
 
-// Streamer.Bot setup
-const sbClient = new StreamerbotClient({
-  host: sbAddress,
-  port: sbPort,
-  password: sbPassword,
+// =============================
+// MAIN SECTION
+// =============================
 
-  onConnect: (data) => {
-    if (!sbClientConnected){
-      sbClientConnected = true;
-      console.log(`✅ Streamer.bot Client connected to ${sbAddress}:${sbPort}`)
-      console.debug(data);
-      createToast('success', 'fa-solid fa-circle-check', widgetTitle, 'Connected to SB Client', streamerbot);
-    }
-  },
-
-  onDisconnect: () => {
-    if (sbClientConnected) {
-      sbClientConnected = false;
-      console.warn("❌ Streamer.bot Client disconnected");
-      createToast('warning', 'fa-solid fa-triangle-exclamation', widgetTitle, 'Disconnected from SB Client', streamerbot);
-    }  
-  }
-});
-
-// ==========================
-// Streamer.bot Event Handler
-// ==========================
-sbClient.on('Twitch.ChatMessage', (response) => {
-  console.debug('📢 New Twitch Chat:', response);
-  const chat = response.data;
-  const platform = response.event.source;
-  onChatMessage(chat.user.login, chat.message.message, platform);
-});
-
-sbClient.on('Kick.ChatMessage', (response) => {
-  console.debug('📢 New Kick Chat:', response);
-  const chat = response.data;
-  const platform = response.event.source;
-  onChatMessage(chat.user.login, chat.text, platform);
-});
-
-sbClient.on('YouTube.Message', (response) => {
-  console.debug('📢 New YouTube Chat:', response);
-  const chat = response.data;
-  const platform = response.event.source;
-  onChatMessage(chat.user.name, chat.message, platform);
-});
-
-sbClient.on('Raw.Action', (response) => {
-  console.debug('📢 Action Executed:', response);
-  const actionId = response.data.actionId;
-  const data = response.data;
-  
-  switch (actionId) {
-    case "8413040f-ee21-439d-be53-b44f55d35998":
-      console.debug("Action Executed: MultiPoll Widget • [Trigger] Clear");
-      resetPoll();
-      channel.postMessage({ action: 'reloadPage' });
-      break;
-
-    case "e14a127f-34f6-4091-ba06-a1eb4d387564":
-      console.debug("Action Executed: MultiPoll Widget • [Trigger] Start/End Poll");
-      channel.postMessage({ action: 'startEndBtn' });
-      break;
-
-    case "705bae3a-36f1-4f42-9bb1-110c8bc5feb7":
-      console.debug("Action Executed: MultiPoll Widget • [Trigger] Toggle Poll ");
-      togglePoll();
-      break;
-
-    case "4c16514d-8672-4c36-823e-ce11219a3bdb":
-      console.debug("Action Executed: MultiPoll Widget • Poll Started", data);
-      const args = data.arguments;
-      if (!args.requeuedAction) { 
-        return;
-      }
-      
-      requeuedAction = true;
-      let parsedChoices = [];
-      try {
-        // If it's a string, parse it. If it's somehow already an object, use it.
-        parsedChoices = typeof args.choicesArray === 'string' 
-          ? JSON.parse(args.choicesArray) 
-          : args.choicesArray;
-      } catch (e) {
-        console.error("Failed to parse choicesArray:", e);
-        parsedChoices = []; 
-      }
-
-      createPoll(parsedChoices, args.pollTitle, args.pollDuration);
-      showPoll();
-
-      // ⚡ BROADCAST TO SETTINGS.JS
-      // We send a new action 'syncRequeue' so settings.js knows to update its inputs
-      channel.postMessage({
-        action: 'syncRequeue',
-        title: args.pollTitle,
-        choicesArray: parsedChoices,
-        duration: args.pollDuration
-      });
-      break;
-
-    default:
-      console.debug("Action ID not recognized");
-      break;
-  }
-});
-
-// TikFinity setup
-function connectTikfinity() {
-  const socket = new WebSocket("ws://localhost:21213");
-
-  socket.onopen = () => {
-    if (!tikfinityConnected) {
-      tikfinityConnected = true;
-      console.log("✅ Connected to TikFinity");
-      createToast('success', 'fa-solid fa-circle-check', widgetTitle, 'Connected to Tikfinity', tikfinity);
-    }
-  };
-
-  socket.onclose = () => {
-    if (tikfinityConnected) {
-      tikfinityConnected = false;
-      console.warn("❌ Disconnected from TikFinity");
-      createToast('warning', 'fa-solid fa-triangle-exclamation', widgetTitle, 'Disconnected from Tikfinity', tikfinity);
-    }
-    setTimeout(connectTikfinity, 3000);
-  };
-
-  socket.onmessage = (event) => {
-    try {
-      const data = JSON.parse(event.data);
-
-      switch (data.event) {
-
-        case "chat": {
-          const chat = data.data;
-          onChatMessage(chat.uniqueId, chat.comment, "TikTok");
-          break;
-        }
-
-        default:
-          break;
-
-      }
-    } catch (err) {
-      console.error("Failed to process TikFinity event:", err);
-    }
-  };
-}
-
-document.addEventListener('DOMContentLoaded', connectTikfinity);
-
-// Toast notifications for connections
-function createToast(type, icon, title, text, source){
-    let newToast = document.createElement('div');
-    let logo;
-    if (source === "streamerbot") {
-        logo = 'assets/images/streamerbot-logo.png';
-    } else if (source === "tikfinity") {
-        logo = "assets/images/tikfinity-logo.png";
-    }
-
-    newToast.innerHTML = `
-        <div class="toast ${type}">
-            <i class="${icon}"></i>
-            <div class="content">
-                <div class="title">${title}</div>
-                <span>${text}</span>
-            </div>
-            <img class="toast-logo" src="${logo}" alt="${source} logo">
-        </div>`;
-    notifications.appendChild(newToast);
-    newToast.timeOut = setTimeout(
-        ()=>newToast.remove(), 3000
-    )
-}
-   
-// Modified function to accept an array of choice objects
-// Each object in choicesArray should have at least a `text` property
 function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to vote", duration = pollDuration) {
   pollSessionId++;
 
@@ -323,7 +230,12 @@ function createPoll(choicesArray, pollTitle = "Type number (1, 2...) in chat to 
   args = addChoicesToArgs(args, choicesArray);
 
   if (!requeuedAction) {
-    sbClient.doAction("4c16514d-8672-4c36-823e-ce11219a3bdb", args);
+    //sbClient.doAction("4c16514d-8672-4c36-823e-ce11219a3bdb", args);
+      channel.postMessage({
+      type: "SB_DO_ACTION",
+      actionId: "4c16514d-8672-4c36-823e-ce11219a3bdb",
+      args: args,
+    });
   }
   
 }
@@ -532,7 +444,12 @@ function highlightWinner() {
     "totalVotes": totalVotes,
   });
 
-  sbClient.doAction("e5a8fac6-f58e-4344-88eb-9bd13be4ab2e", args);
+  // sbClient.doAction("e5a8fac6-f58e-4344-88eb-9bd13be4ab2e", args);
+  channel.postMessage({
+      type: "SB_DO_ACTION",
+      actionId: "e5a8fac6-f58e-4344-88eb-9bd13be4ab2e",
+      args: args,
+    });
 
   // 3. Send the winner to config page (The Handshake)
   channel.postMessage({
@@ -546,8 +463,15 @@ function highlightWinner() {
 function onChatMessage(username, message, platform) {
   if (!isPollActive) return; // check if poll is currently active
 
-  const vote = parseInt(message);
-  if (!vote || vote < 1 || vote > maxChoices) return; // invalid vote
+  const trimmed = message.trim();
+
+  // Only allow digits (no letters, no symbols)
+  if (!/^\d+$/.test(trimmed)) return;
+
+  const vote = Number(trimmed);
+
+  if (vote < 1 || vote > maxChoices) return;
+
 
   // Ensure there's a Set for this platform
   if (!votedUsers.has(platform)) {
@@ -576,10 +500,6 @@ function addChoicesToArgs(targetArgs, choiceList) {
   });
   
   return targetArgs;
-}
-
-function sendMessageToPlatforms(actionId, message) {
-  sbClient.doAction(actionId, {"message" : message});
 }
 
 function showPoll() {

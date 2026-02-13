@@ -1,11 +1,13 @@
-// =============================
-// Streamer.bot Connection System
-// =============================
+// Create BroadcastChannel
+const channel = new BroadcastChannel('rexbordzPollWidget');
 
 let sbClient = null;
 let sbClientConnected = false;
+let tikfinitySocket = null;
+let tikfinityConnected = false;
 let isConnecting = false;
 let streamerbotActions = [];
+
 
 const STORAGE_KEYS = {
   address: "sb_address",
@@ -18,19 +20,35 @@ const STORAGE_KEYS = {
 // Status Indicator
 // =============================
 
+let lastSBConnected = false;
+let lastSBVersion = "";
+
 function updateStatusIndicator(isConnected, version = "") {
   const indicator = document.querySelector(".status-indicator");
   if (!indicator) return;
 
-  indicator.classList.remove("online", "offline");
-  indicator.classList.add(isConnected ? "online" : "offline");
-
-  // Update the tooltip title based on connection state
-  if (isConnected) {
-    indicator.title = `Connected to Streamer.bot ${version}`;
-  } else {
-    indicator.title = "Disconnected from Streamer.bot";
+  // ----- If SB state was provided, update stored state -----
+  if (typeof isConnected === "boolean") {
+    lastSBConnected = isConnected;
+    lastSBVersion = version || "";
   }
+
+  // ----- Only SB controls visual class -----
+  indicator.classList.remove("online", "offline");
+  indicator.classList.add(lastSBConnected ? "online" : "offline");
+
+  // ----- SB Line -----
+  const sbLine = lastSBConnected
+    ? `Connected to Streamer.bot ${lastSBVersion}`
+    : "Disconnected from Streamer.bot";
+
+  // ----- Tik Line -----
+  const tikLine = tikfinityConnected
+    ? "Connected to TikFinity"
+    : "Disconnected from TikFinity (Optional)";
+
+  // ----- Tooltip -----
+  indicator.title = `${sbLine}\n${tikLine}`;
 }
 
 
@@ -84,14 +102,6 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
 
       console.log(`✅ Streamer.bot connected to ${sbAddress}:${sbPort}`);
       const sbVersion = data.info?.version || data.version || "";
-      const channel = new BroadcastChannel('rexbordzPollWidget');
-      channel.postMessage({
-        type: 'CONNECTION_SUCCESS',
-        address: sbAddress,
-        port: sbPort,
-        password: sbPassword
-    });
-
       
       console.debug(data);
 
@@ -101,7 +111,7 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
       // Hide banner
       if (warningBanner) warningBanner.classList.add("hidden");
 
-      const activeOverlay = document.querySelector(".connection-overlay");
+      const activeOverlay = document.querySelector(".modal-overlay");
         if (activeOverlay) activeOverlay.remove(); 
 
       
@@ -111,7 +121,7 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
       buildActionLookup();
       const allValid = computeIntegrationHealth();
       updateIntegrationButton(allValid);
-      paintIntegrationRows(); // will safely do nothing if modal not open
+      paintActionRows(); // will safely do nothing if modal not open
     },
 
     onDisconnect: () => {
@@ -139,13 +149,84 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
     }
   });
 
+  // After sbClient is instantiated:
+  sbClient.on("Twitch.ChatMessage", (response) => forward("Twitch.ChatMessage", response));
+  sbClient.on("Kick.ChatMessage", (response) => forward("Kick.ChatMessage", response));
+  sbClient.on("YouTube.Message", (response) => forward("YouTube.Message", response));
+  sbClient.on("Raw.Action", (response) => forward("Raw.Action", response));
+
 }
 
+function forward(eventName, response) {
+  // Send the whole payload, plus eventName for routing
+  channel.postMessage({
+    type: "SB_EVENT",
+    event: eventName,
+    payload: response
+  });
+}
+
+// =============================
+// Tikfinity Setup
+// =============================
+
+function connectTikfinity() {
+  // Prevent duplicate sockets
+  if (tikfinitySocket && (tikfinitySocket.readyState === WebSocket.OPEN || tikfinitySocket.readyState === WebSocket.CONNECTING)) {
+    return;
+  }
+
+  tikfinitySocket = new WebSocket("ws://localhost:21213");
+
+  tikfinitySocket.onopen = () => {
+    if (!tikfinityConnected) {
+      tikfinityConnected = true;
+      console.log("✅ Connected to TikFinity");
+      updateStatusIndicator();
+    }
+  };
+
+  tikfinitySocket.onclose = () => {
+    if (tikfinityConnected) {
+      tikfinityConnected = false;
+      console.warn("❌ Disconnected from TikFinity");
+      updateStatusIndicator();
+    }
+    setTimeout(connectTikfinity, 3000);
+  };
+
+  tikfinitySocket.onmessage = (event) => {
+    try {
+      const packet = JSON.parse(event.data);
+
+      switch (packet.event) {
+
+        case "chat": {
+          // Broadcast the WHOLE packet, minimal + consistent
+          channel.postMessage({
+            type: "TIKFINITY_EVENT",
+            source: "TikTok",
+            event: "chat",
+            payload: packet
+          });
+          break;
+        }
+
+        default:
+          break;
+      }
+
+    } catch (err) {
+      console.error("Failed to process TikFinity event:", err);
+    }
+  };
+}
+
+document.addEventListener("DOMContentLoaded", connectTikfinity);
 
 // =============================
 // Connection Modal Logic
 // =============================
-
 document.addEventListener("DOMContentLoaded", () => {
 
   updateStatusIndicator(false);
@@ -172,29 +253,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function openConnectionModal(isInitialLoad = false) {
 
-  if (document.querySelector(".connection-overlay")) return;
+  if (document.querySelector(".modal-overlay")) return;
 
   const saved = loadConnectionSettings();
 
   const overlay = document.createElement("div");
-  overlay.className = "connection-overlay";
+  overlay.className = "modal-overlay";
 
   overlay.innerHTML = `
-    <div class="connection-modal">
+    <div id="connection" class="modal">
     
-      <div class="connection-header">
-        <div class="connection-header-left">
-          <img src="assets/images/streamerbot-logo.svg" 
-               class="connection-icon" 
+      <div class="modal-header">
+        <div class="modal-header-left">
+          <img src="../assets/images/streamerbot-logo.svg" 
+               class="modal-icon" 
                alt="logo">
-          <span class="connection-title">MULTIPOLL</span>
+          <span class="modal-title">MULTIPOLL</span>
         </div>
-        <button class="connection-close">&times;</button>
+        <button class="modal-close">&times;</button>
       </div>
 
-      <div class="connection-body">
+      <div class="modal-body">
 
-        <div class="connection-warning ${sbClientConnected ? 'hidden' : ''}">
+        <div class="modal-warning ${sbClientConnected ? 'hidden' : ''}">
           Disconnected from Streamer.bot
         </div>
 
@@ -218,7 +299,7 @@ function openConnectionModal(isInitialLoad = false) {
         </div>
 
         <div class="form-row">
-          <button class="form-button" id="connect-btn">Connect</button>
+          <button class="modal-button" id="connect-btn">Connect</button>
         </div>
 
       </div>
@@ -227,11 +308,11 @@ function openConnectionModal(isInitialLoad = false) {
 
   document.body.appendChild(overlay);
 
-  const warningBanner = overlay.querySelector(".connection-warning");
+  const warningBanner = overlay.querySelector(".modal-warning");
   const connectBtn = overlay.querySelector("#connect-btn");
 
   // Close button
-  overlay.querySelector(".connection-close")
+  overlay.querySelector(".modal-close")
     .addEventListener("click", () => overlay.remove());
 
   overlay.addEventListener("click", (e) => {
@@ -267,7 +348,7 @@ function openConnectionModal(isInitialLoad = false) {
 // Action Button Logic
 // =============================
 
-const integrationActions = [
+const sbActions = [
   { id: "8413040f-ee21-439d-be53-b44f55d35998", name: "MultiPoll Widget • [Trigger] Clear " }, 
   { id: "e14a127f-34f6-4091-ba06-a1eb4d387564", name: "MultiPoll Widget • [Trigger] Start/End Poll" }, 
   { id: "705bae3a-36f1-4f42-9bb1-110c8bc5feb7", name: "MultiPoll Widget • [Trigger] Toggle Poll " }, 
@@ -285,41 +366,40 @@ if (integrationBtn) {
 // Open Window
 function openIntegrationModal() {
 
-  if (document.querySelector(".integration-overlay")) return;
+  if (document.querySelector(".modal-overlay")) return;
   
 
   const overlay = document.createElement("div");
-  overlay.className = "integration-overlay";
+  overlay.className = "modal-overlay";
 
   overlay.innerHTML = `
-    <div class="integration-modal">
+    <div id="sb-actions" class="modal" >
 
       <!-- Close Button -->
-      <button class="connection-close">&times;</button>
+      <button class="modal-close">&times;</button>
 
-      <div class="integration-body">
+      <div class="modal-body">
 
-        <div class="integration-status-text">
-          Some actions are not found.
+        <div class="status-text">
+          Some actions are not found
         </div>
 
-        <div class="integration-list"></div>
+        <div class="actions-list"></div>
 
-        <div class="integration-import-label">
+        <div class="import-label">
           Import the following to Streamer.bot:
         </div>
 
-        <div class="integration-code-row">
-          <input type="text"
-                 class="integration-code"
-                 value="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"
-                 readonly>
+        <div class="code-row">
+          <div class="code" id="codeBox"> 
+            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
+          </div>
 
           <button class="copy-btn">Copy</button>
         </div>
 
-        <button class="form-button" id="integration-recheck-btn">
-          Recheck Integration
+        <button class="modal-button">
+          Recheck
         </button>
 
       </div>
@@ -327,12 +407,12 @@ function openIntegrationModal() {
   `;
 
   document.body.appendChild(overlay);
-  renderIntegrationList();
+  renderActionsList();
   updateIntegrationStatuses();
 
 
   // Close logic
-  overlay.querySelector(".connection-close")
+  overlay.querySelector(".modal-close")
   .addEventListener("click", () => overlay.remove());
 
 
@@ -342,19 +422,39 @@ function openIntegrationModal() {
 
   // Copy logic
   const copyBtn = overlay.querySelector(".copy-btn");
-  const codeInput = overlay.querySelector(".integration-code");
+  const codeBox = overlay.querySelector(".code");
 
   copyBtn.addEventListener("click", () => {
-    codeInput.select();
-    document.execCommand("copy");
+    const text = codeBox.textContent.trim();
 
-    copyBtn.textContent = "Copied";
-    copyBtn.classList.add("copied");
+    // Create a temporary textarea
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
 
-    setTimeout(() => {
-      copyBtn.textContent = "Copy";
-      copyBtn.classList.remove("copied");
-    }, 1500);
+    // Prevent scrolling / flashing
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "-9999px";
+
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+      document.execCommand("copy");
+
+      copyBtn.textContent = "Copied";
+      copyBtn.classList.add("copied");
+
+      setTimeout(() => {
+        copyBtn.textContent = "Copy";
+        copyBtn.classList.remove("copied");
+      }, 1500);
+    } catch (err) {
+      console.error("Copy failed", err);
+    }
+
+    document.body.removeChild(textarea);
   });
 }
 
@@ -371,10 +471,10 @@ function buildActionLookup() {
 function updateIntegrationStatuses() {
   let allValid = true;
 
-  integrationActions.forEach(expected => {
+  sbActions.forEach(expected => {
 
     const row = document.querySelector(
-      `.integration-row[data-id="${expected.id}"]`
+      `.row[data-id="${expected.id}"]`
     );
 
     if (!row) return;
@@ -392,42 +492,42 @@ function updateIntegrationStatuses() {
 
     if (isValid) {
       statusEl.classList.add("found");
-      statusEl.textContent = "✔ Found";
+      statusEl.textContent = "✔";
     } else {
       statusEl.classList.add("not-found");
-      statusEl.textContent = "✖ Not Found";
+      statusEl.textContent = "✖";
       allValid = false;
     }
   });
 
-  updateIntegrationSummary(allValid);
+  updateActionsSummary(allValid);
 }
 
-function updateIntegrationSummary(allValid) {
-  const summary = document.querySelector(".integration-status-text");
+function updateActionsSummary(allValid) {
+  const summary = document.querySelector(".status-text");
   const integrationBtn = document.querySelector(".integration-check");
 
   if (!summary || !integrationBtn) return;
 
-  summary.classList.remove("status-valid", "status-invalid", "status-checking");
+  summary.classList.remove("valid", "invalid", "checking");
 
   if (allValid) {
-  summary.textContent = "All actions are found.";
-  summary.classList.add("status-valid");
+  summary.textContent = "All actions are found";
+  summary.classList.add("valid");
   } else {
-  summary.textContent = "Some actions are not found.";
-  summary.classList.add("status-invalid");
+  summary.textContent = "Some actions are not found";
+  summary.classList.add("invalid");
   }
 
 }
 
-function renderIntegrationList() {
-  const list = document.querySelector(".integration-list");
+function renderActionsList() {
+  const list = document.querySelector(".actions-list");
   list.innerHTML = "";
 
-  integrationActions.forEach(action => {
+  sbActions.forEach(action => {
     const row = document.createElement("div");
-    row.className = "integration-row";
+    row.className = "row";
     row.dataset.id = action.id;
 
     row.innerHTML = `
@@ -441,7 +541,7 @@ function renderIntegrationList() {
 
 function resetIntegrationState() {
   const integrationBtn = document.querySelector(".integration-check");
-  const summary = document.querySelector(".integration-status-text");
+  const summary = document.querySelector(".status-text");
 
   if (integrationBtn) {
     integrationBtn.classList.remove("warning");
@@ -456,7 +556,7 @@ function resetIntegrationState() {
 document.addEventListener("DOMContentLoaded", () => { resetIntegrationState(); });
 
 function computeIntegrationHealth() {
-  return integrationActions.every(expected => {
+  return sbActions.every(expected => {
     const found = actionLookup.get(expected.id);
 
     return (
@@ -478,10 +578,10 @@ function updateIntegrationButton(allValid) {
   }
 }
 
-function paintIntegrationRows() {
-  integrationActions.forEach(expected => {
+function paintActionRows() {
+  sbActions.forEach(expected => {
     const row = document.querySelector(
-      `.integration-row[data-id="${expected.id}"]`
+      `.row[data-id="${expected.id}"]`
     );
     if (!row) return;
 
@@ -507,14 +607,14 @@ function paintIntegrationRows() {
 }
 
 async function recheckIntegration() {
-  const summary = document.querySelector(".integration-status-text");
+  const summary = document.querySelector(".status-text");
   const recheckBtn = document.getElementById("integration-recheck-btn");
 
   // 1. Immediate UI feedback (Optional but recommended)
   if (recheckBtn) recheckBtn.classList.add("loading"); // Add a CSS spinner if you have one
   if (summary) {
     summary.textContent = "Fetching latest actions...";
-    summary.classList.add("status-checking");
+    summary.classList.add("checking");
   }
 
   try {
@@ -529,9 +629,9 @@ async function recheckIntegration() {
     const allValid = computeIntegrationHealth();
 
     // 5. PAINT: Update all UI elements
-    updateIntegrationSummary(allValid);
+    updateActionsSummary(allValid);
     updateIntegrationButton(allValid);
-    paintIntegrationRows();
+    paintActionRows();
 
     console.log("Integration recheck complete. Healthy:", allValid);
 
@@ -549,6 +649,24 @@ document.addEventListener("click", (event) => {
     recheckIntegration();
   }
 });
+
+channel.addEventListener("message", async (e) => {
+  const data = e.data;
+  if (data?.type !== "SB_DO_ACTION") return;
+
+  if (!sbClientConnected || !sbClient) {
+    console.warn("SB_DO_ACTION requested but SB not connected");
+    return;
+  }
+
+  try {
+    await sbClient.doAction(data.actionId, data.args || {});
+    console.debug("✅ SB Action executed:", data.actionId, data.args);
+  } catch (err) {
+    console.error("❌ SB Action failed:", err);
+  }
+});
+
 
 
 

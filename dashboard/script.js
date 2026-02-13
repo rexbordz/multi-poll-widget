@@ -1,11 +1,10 @@
-// Create BroadcastChannel
-const channel = new BroadcastChannel('rexbordzPollWidget');
 
 // Select input elements
 const pollTitleInput = document.querySelector('#poll-title');
 const choiceInputs = document.querySelectorAll('.choice-input');
 const durationDropdown = document.querySelector('#duration-dropdown');
 const durationInput = document.querySelector('#duration-input');
+const uiChannel = new BroadcastChannel('rexbordzPollWidget');
 
 let lastSelectedDuration = durationDropdown.value; // remember initial choice
 
@@ -174,7 +173,7 @@ resetBtn.addEventListener('click', () => {
  * Broadcast event listeners
  */
 
-channel.onmessage = (e) => {
+uiChannel.onmessage = (e) => {
   const data = e.data;
 
   // --- Live Sync Logic ---

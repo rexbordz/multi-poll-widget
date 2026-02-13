@@ -4,7 +4,7 @@ Introducing **rexbordz’s MultiPoll Widget**.
 
 It’s a clean browser-source widget that lets you run polls right on your stream, pulling votes straight from **Twitch**, **YouTube**, **Kick**, and **TikTok** chat. You can set up 2–5 choices, and your viewers just vote by typing the number of their choice (1, 2, 3, 4, or 5). Simple and universal.
 
-Starting a poll is just as easy. I built a very intuitive settings page where you can configure everything, and since it’s all browser-based, you can even add it as a custom dock inside OBS. That means whenever you wanna throw out a global poll to your entire audience, you can launch it instantly. All without leaving OBS!
+Starting a poll is super easy. I built a very intuitive dock page where you can configure everything. This dock also shows a live data of the poll if there's an active one going on. Isn't that cool?!
 
 <img width="809" height="313" alt="Multipoll sample image" src="https://github.com/user-attachments/assets/3f1e8417-f46d-46b4-af75-4a85c361ad02" />
 
@@ -47,7 +47,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
 4. Add the **MultiPoll Widget Settings Page** as a **Custom Browser Dock** to your streaming software of choice. 
     
     ```xml
-    https://rexbordz.github.io/multi-poll-widget/settings
+    https://rexbordz.github.io/multi-poll-widget/dashboard
     ```
     <img width="1052" height="623" alt="image" src="https://github.com/user-attachments/assets/bac659a5-fe9e-4db1-ab3f-0e555ca8bf3d" />
     

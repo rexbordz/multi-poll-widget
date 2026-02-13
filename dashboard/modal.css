@@ -1,0 +1,323 @@
+/* Track */
+.modal-body::-webkit-scrollbar-track,
+.code::-webkit-scrollbar-track {
+  background: #1c1c1c;
+}
+
+/* Thumb */
+.modal-body::-webkit-scrollbar-thumb,
+.code::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 5px;
+  border: 2px solid #1c1c1c;
+}
+
+/* Hover */
+.modal-body::-webkit-scrollbar-thumb:hover,
+.code::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
+}
+
+/* Connection Modal*/
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+
+  /* Keeps the modal perfectly centered */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 9999;
+  padding: 15px; /* Ensures the modal doesn't touch screen edges on tiny screens */
+}
+
+.modal { 
+  background: #181818;
+  /* Remove 'margin: 15px' if using 'padding' on overlay; it can conflict with flex centering */
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  
+  /* CRITICAL UPDATES: */
+  display: flex;
+  flex-direction: column;   /* Allows internal elements to stack correctly */
+  max-height: 90vh;         /* Limits height to 90% of the viewport */
+  width: 100%;
+  max-width: 500px;         /* Or whatever your preferred width is */
+  overflow: hidden;         /* Clips the sharp edges of internal scrolling content */
+  
+  animation: modalFadeIn 0.18s ease-out;
+}
+
+/* NEW: Apply scrolling only to the body, keeping the header fixed */
+.modal-body {
+  overflow-y: auto;         /* Enables vertical scrolling when content exceeds max-height */
+  flex-grow: 1;             /* Allows body to take up all available vertical space */
+  padding: 20px;            /* Standard internal spacing */
+}
+
+#connection.modal {
+  max-width: 430px;
+}
+
+#connection .modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px 18px;
+  background: #141414;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+#connection .modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#connection .modal-title {
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+#connection .modal-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+#connection .modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-row {
+  display: flex;
+  /* Allows the items to wrap to a new line when cramped */
+  flex-wrap: wrap; 
+  gap: 14px;
+  /* Ensures items align to the start of the container */
+  width: 100%;
+}
+
+.two-cols .form-group {
+  /* This ensures they take equal space but can't shrink 
+     smaller than a reasonable width (e.g., 150px) */
+  flex: 1 1 150px; 
+}
+
+.form-group.full {
+  /* Forces the password and button rows to always take 100% width */
+  flex: 1 1 100%;
+}
+
+/* Ensure inputs don't overflow their parents */
+.form-group input {
+  width: 100%;
+  box-sizing: border-box; /* Crucial: includes padding/border in the width */
+  background: #101010;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #fff;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #bbb;
+  margin-bottom: 8px; 
+  display: block; 
+}
+
+.form-group input:focus {
+  border-color: #22c55e;
+}
+
+.required {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Action Integration Button */
+#sb-actions.modal {
+  width: 500px;
+  position: relative;
+}
+
+#sb-actions .modal-close {
+  position: absolute;
+  top: 15px;
+  right: 22px;
+}
+
+#sb-actions .modal-body {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.status-text {
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.status-text.valid {
+  color: #22c55e;
+}
+
+.status-text.invalid {
+  color: #ef9144;
+}
+
+.status-text.checking {
+  color: #aaa;
+}
+
+.actions-list {
+  background: #101010;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  font-size: 0.85rem;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status.found {
+  color: #22c55e;
+}
+
+.status.not-found {
+  color: #ef4444;
+}
+
+.import-label {
+  font-size: 0.85rem;
+  color: #bbb;
+}
+
+.code-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.code {
+  flex: 1 1 300px;
+  min-width: 0;
+
+  background: #101010;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #fff;
+
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.copy-btn {
+  flex: 0 0 auto;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+
+  background: #1f1f1f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+
+  transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+  background: #2a2a2a;
+}
+
+@media (max-width: 480px) {
+  .copy-btn {
+    flex: 1 1 100%;
+  }
+}
+
+.copy-btn.copied {
+  background: #22c55e;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(34,197,94,0.6);
+}
+
+.modal-warning {
+  background: rgba(239,68,68,0.15);
+  color: #ef4444;
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68,0.3);
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+
+  background: #1f1f1f;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: bold;
+
+  transition: all 0.2s ease;
+}
+
+.modal-button:hover {
+  background: #22c55e;
+  box-shadow: 0 0 12px rgba(34,197,94,0.6);
+}
+
+@keyframes modalFadeIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
