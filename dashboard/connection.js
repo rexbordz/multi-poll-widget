@@ -398,7 +398,7 @@ function openIntegrationModal() {
           <button class="copy-btn">Copy</button>
         </div>
 
-        <button class="modal-button">
+        <button id="integration-recheck-btn" class="modal-button">
           Recheck
         </button>
 
