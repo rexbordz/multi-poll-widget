@@ -97,7 +97,7 @@ channel.onmessage = (e) => {
             createPoll(parsedChoices, args.pollTitle, args.pollDuration);
             showPoll();
 
-            // Broadcast to settings.js
+            // Broadcast to Dashboard's script.js
             channel.postMessage({
               action: 'syncRequeue',
               title: args.pollTitle,
@@ -381,8 +381,9 @@ function highlightWinner() {
   let winnerArray = [];
   let voteCount = 0;
   let winnerPercent = "0%";
-
   const choices = document.querySelectorAll(".choice");
+
+  isPollActive = false;
 
   if (!votes || votes.length === 0 || Math.max(...votes) === 0) {
     pollResults = "NOBODY voted. . . LOL";
@@ -435,7 +436,7 @@ function highlightWinner() {
   // This ensures they follow choicesArray in the object key order
   args = addChoicesToArgs(args, currentPollChoices);
 
-  // 3. Add the "Results" data to the end of the object
+  // Add the "Results" data to the end of the object
   Object.assign(args, {
     "winner": winnerArray.join(", "),
     "numVotes": voteCount,
@@ -451,7 +452,7 @@ function highlightWinner() {
       args: args,
     });
 
-  // 3. Send the winner to config page (The Handshake)
+  // Send the winner to config page (The Handshake)
   channel.postMessage({
     action: 'highlightWinner',
     winners: winners, 
@@ -552,7 +553,7 @@ function endPoll() {
 function resetPoll() {
   const overlay = document.querySelector(".poll-timer-overlay");
   if (overlay) overlay.remove();
-  isPollActive = false;
+  if (isPollActive) isPollActive = false;
 
   // Clear any timers an data
   clearTimeout(pollTimer);

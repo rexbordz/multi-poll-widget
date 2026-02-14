@@ -149,7 +149,6 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
     }
   });
 
-  // After sbClient is instantiated:
   sbClient.on("Twitch.ChatMessage", (response) => forward("Twitch.ChatMessage", response));
   sbClient.on("Kick.ChatMessage", (response) => forward("Kick.ChatMessage", response));
   sbClient.on("YouTube.Message", (response) => forward("YouTube.Message", response));
@@ -165,6 +164,24 @@ function forward(eventName, response) {
     payload: response
   });
 }
+
+// Broadcast Listener for Streamer.bot Requests
+channel.addEventListener("message", async (e) => {
+  const data = e.data;
+  if (data?.type !== "SB_DO_ACTION") return;
+
+  if (!sbClientConnected || !sbClient) {
+    console.warn("SB_DO_ACTION requested but SB not connected");
+    return;
+  }
+
+  try {
+    await sbClient.doAction(data.actionId, data.args || {});
+    console.debug("✅ SB Action executed:", data.actionId, data.args);
+  } catch (err) {
+    console.error("❌ SB Action failed:", err);
+  }
+});
 
 // =============================
 // Tikfinity Setup
@@ -252,7 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openConnectionModal(isInitialLoad = false) {
-
   if (document.querySelector(".modal-overlay")) return;
 
   const saved = loadConnectionSettings();
@@ -261,20 +277,16 @@ function openConnectionModal(isInitialLoad = false) {
   overlay.className = "modal-overlay";
 
   overlay.innerHTML = `
-    <div id="connection" class="modal">
-    
+    <div id="connection" class="modal" role="dialog" aria-modal="true">
       <div class="modal-header">
         <div class="modal-header-left">
-          <img src="../assets/images/streamerbot-logo.svg" 
-               class="modal-icon" 
-               alt="logo">
+          <img src="../assets/images/streamerbot-logo.svg" class="modal-icon" alt="logo">
           <span class="modal-title">MULTIPOLL</span>
         </div>
-        <button class="modal-close">&times;</button>
+        <button class="modal-close" type="button" aria-label="Close">&times;</button>
       </div>
 
       <div class="modal-body">
-
         <div class="modal-warning ${sbClientConnected ? 'hidden' : ''}">
           Disconnected from Streamer.bot
         </div>
@@ -299,32 +311,39 @@ function openConnectionModal(isInitialLoad = false) {
         </div>
 
         <div class="form-row">
-          <button class="modal-button" id="connect-btn">Connect</button>
+          <button class="modal-button" id="connect-btn" type="button">Connect</button>
         </div>
-
       </div>
     </div>
   `;
 
+  document.body.classList.add("modal-open");
   document.body.appendChild(overlay);
 
+  const modal = overlay.querySelector(".modal");
   const warningBanner = overlay.querySelector(".modal-warning");
   const connectBtn = overlay.querySelector("#connect-btn");
 
-  // Close button
-  overlay.querySelector(".modal-close")
-    .addEventListener("click", () => overlay.remove());
+  if (document.hasFocus()) {
+      // put focus on the first input or button (your choice)
+      overlay.querySelector("#connect-btn")?.focus();
+    }
+    
+  const closeModal = () => {
+    overlay.remove();
+    document.body.classList.remove("modal-open");
+  };
 
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) overlay.remove();
-  });
+  overlay.querySelector(".modal-close").addEventListener("click", closeModal);
 
-  // Connect button
+  overlay.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
+  overlay.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
+
   connectBtn.addEventListener("click", () => {
+    const sbAddress = overlay.querySelector("#sb-address").value.trim();
+    const sbPort = overlay.querySelector("#sb-port").value.trim();
+    const sbPassword = overlay.querySelector("#sb-password").value.trim();
 
-    const sbAddress = document.getElementById("sb-address").value.trim();
-    const sbPort = document.getElementById("sb-port").value.trim();
-    const sbPassword = document.getElementById("sb-password").value.trim();
 
     if (!sbAddress || !sbPort) {
       warningBanner.textContent = "Address and Port are required.";
@@ -332,16 +351,10 @@ function openConnectionModal(isInitialLoad = false) {
       return;
     }
 
-    initializeStreamerbotConnection(
-      sbAddress,
-      sbPort,
-      sbPassword,
-      warningBanner,
-      connectBtn,
-      overlay
-    );
+    initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningBanner, connectBtn, overlay);
   });
 
+  focusTrapOnModal(modal); 
 }
 
 // =============================
@@ -368,7 +381,6 @@ function openIntegrationModal() {
 
   if (document.querySelector(".modal-overlay")) return;
   
-
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
 
@@ -406,20 +418,25 @@ function openIntegrationModal() {
     </div>
   `;
 
+  document.body.classList.add("modal-open");
   document.body.appendChild(overlay);
   renderActionsList();
   updateIntegrationStatuses();
-
-
+ 
+  if (document.hasFocus()) {
+    // put focus on the first input or button (your choice)
+    overlay.querySelector("#integration-recheck-btn")?.focus();
+  }
   // Close logic
+  const closeModal = () => {
+    overlay.remove();
+    document.body.classList.remove("modal-open");
+  };
+
   overlay.querySelector(".modal-close")
-  .addEventListener("click", () => overlay.remove());
+    .addEventListener("click", closeModal);
 
-
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) overlay.remove();
-  });
-
+  
   // Copy logic
   const copyBtn = overlay.querySelector(".copy-btn");
   const codeBox = overlay.querySelector(".code");
@@ -456,6 +473,8 @@ function openIntegrationModal() {
 
     document.body.removeChild(textarea);
   });
+
+  focusTrapOnModal(overlay);
 }
 
 let actionLookup = new Map();
@@ -643,6 +662,47 @@ async function recheckIntegration() {
   }
 }
 
+function focusTrapOnModal(modalRoot) {
+  if (!modalRoot) return;
+
+  const SELECTOR =
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+  modalRoot.addEventListener("keydown", (e) => {
+    // Only care about Tab navigation
+    if (e.key !== "Tab") return;
+
+    // 🧊 MAX CHILL RULE:
+    // Only trap if focus is ALREADY inside modal
+    if (!modalRoot.contains(document.activeElement)) return;
+
+    const focusables = Array.from(modalRoot.querySelectorAll(SELECTOR))
+      .filter(el => !el.disabled && el.tabIndex !== -1 && el.offsetParent !== null);
+
+    if (focusables.length === 0) return;
+
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    // SHIFT + TAB → loop to end
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+      return;
+    }
+
+    // TAB → loop to start
+    if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+      return;
+    }
+
+    // Otherwise → do nothing (normal tab flow inside modal)
+  });
+}             
+
+
 document.addEventListener("click", (event) => {
   if (event.target && event.target.id === "integration-recheck-btn") {
     console.log("Button clicked! Triggering recheck...");
@@ -650,22 +710,6 @@ document.addEventListener("click", (event) => {
   }
 });
 
-channel.addEventListener("message", async (e) => {
-  const data = e.data;
-  if (data?.type !== "SB_DO_ACTION") return;
-
-  if (!sbClientConnected || !sbClient) {
-    console.warn("SB_DO_ACTION requested but SB not connected");
-    return;
-  }
-
-  try {
-    await sbClient.doAction(data.actionId, data.args || {});
-    console.debug("✅ SB Action executed:", data.actionId, data.args);
-  } catch (err) {
-    console.error("❌ SB Action failed:", err);
-  }
-});
 
 
 
