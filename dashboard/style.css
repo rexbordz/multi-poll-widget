@@ -343,11 +343,18 @@ body::-webkit-scrollbar-thumb:hover {
 
 .choice-input {
   width: 100%;
+  max-width: calc(100% - 85px);
+  min-width: 6ch;
   padding-right: 100px; /* Make room so text doesn't overlap the stats */
   z-index: 2; /* Middle Layer */
   background: transparent !important; /* Force transparency */
   border: 1px solid #ccc; /* Give it a border so you see the box */
   position: relative;
+
+  /* Hide excess texts */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .choice-stats {

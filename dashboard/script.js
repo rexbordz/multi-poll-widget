@@ -103,6 +103,16 @@ function startEndPoll() {
       g.style.width = '0%';
     });
 
+    // Reset config-page text stats
+    const choiceContainers = document.querySelectorAll('.choice-container');
+    choiceContainers.forEach(container => {
+      const votesEl = container.querySelector('.votes.config-page');
+      const percentEl = container.querySelector('.percent.config-page');
+
+      if (votesEl) votesEl.textContent = '0 votes';
+      if (percentEl) percentEl.textContent = '0%';
+    });
+
     // Force reflow
     void choicesGroup.offsetWidth;
 
@@ -250,7 +260,6 @@ uiChannel.onmessage = (e) => {
       timeDisplay.textContent = `Time Left: ${formatTime(data.time)}`;
     }
   }
-
 
   // RESET (Poll State false)
   if (data.action === 'pollState' && data.isActive === false) {
