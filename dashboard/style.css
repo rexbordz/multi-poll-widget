@@ -105,7 +105,9 @@ body::-webkit-scrollbar-thumb:hover {
 
 .dock-header-left {
   display: flex;
+  flex: 1;
   align-items: center;
+  min-width: 0;
 }
 
 .widget-title {
@@ -117,10 +119,14 @@ body::-webkit-scrollbar-thumb:hover {
 .widget-title .text {
   font-family: 'URW DIN';
   letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .widget-actions {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 14px;
 }
@@ -297,15 +303,15 @@ body::-webkit-scrollbar-thumb:hover {
   box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); /* optional subtle glow */
 }
 
+.input-group .choice-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 .choice-container:focus-within {
   outline: 2px solid #3b82f6; /* bright blue */
   outline-offset: 2px;         /* space between outline and element */
   box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); /* optional subtle glow */
-}
-
-/* Remove default browser outline from the input to prevent double borders */
-.choice-input:focus {
-  outline: none;
 }
 
 .input-group input::placeholder {
@@ -314,15 +320,17 @@ body::-webkit-scrollbar-thumb:hover {
 
 .choice-container {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto; /* input takes remaining space, stats hugs right */
   align-items: center;
+  gap: 10px;
+
   border-radius: 6px;
   overflow: hidden;
   background-color: #222;
   z-index: 0;
 
-  /* ADD THESE: Prepare for the slide animation */
-  max-height: 100px; /* Adjust to slightly taller than your normal row */
+  max-height: 100px;
   opacity: 1;
   transition: max-height 0.5s ease, margin 0.5s ease-in-out, opacity 0.4s ease, transform 0.5s ease-in-out;
 }
@@ -342,30 +350,34 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .choice-input {
+  min-width: 0;              /* CRITICAL for ellipsis inside grid/flex */
   width: 100%;
-  max-width: calc(100% - 85px);
-  min-width: 6ch;
-  padding-right: 100px; /* Make room so text doesn't overlap the stats */
-  z-index: 2; /* Middle Layer */
-  background: transparent !important; /* Force transparency */
-  border: 1px solid #ccc; /* Give it a border so you see the box */
-  position: relative;
+  box-sizing: border-box;
 
-  /* Hide excess texts */
+  padding-right: 0;          /* remove */
+  background: transparent !important;
+  border: none;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .choice-stats {
-  position: absolute;
-  right: 10px;
-  z-index: 3;
-  pointer-events: none; /* User can click "through" the text to the input */
+  position: static;          /* remove absolute */
+  right: auto;
+  margin-right: 10px;
+
   display: flex;
   gap: 10px;
   font-size: 0.85em;
+  white-space: nowrap;       /* keep it on one line */
+  pointer-events: none;
 }
+
 
 /* Default: Hide stats and gauge when poll is NOT running */
 #choices-group .choice-stats {
@@ -448,6 +460,10 @@ body::-webkit-scrollbar-thumb:hover {
 #choices-group.poll-active .time-remaining {
   opacity: 1;
   visibility: visible;
+}
+
+.percent {
+  font-weight: 600;
 }
 
 /* Button Group */
