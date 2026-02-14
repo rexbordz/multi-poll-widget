@@ -336,9 +336,6 @@ function openConnectionModal(isInitialLoad = false) {
 
   overlay.querySelector(".modal-close").addEventListener("click", closeModal);
 
-  overlay.addEventListener("wheel", (e) => e.preventDefault(), { passive: false });
-  overlay.addEventListener("touchmove", (e) => e.preventDefault(), { passive: false });
-
   connectBtn.addEventListener("click", () => {
     const sbAddress = overlay.querySelector("#sb-address").value.trim();
     const sbPort = overlay.querySelector("#sb-port").value.trim();
