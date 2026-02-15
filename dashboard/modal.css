@@ -276,6 +276,24 @@ body.modal-open {
   background: #2a2a2a;
 }
 
+.tip-line {
+  margin: 8px 0 14px 0;
+  font-size: 0.85em;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.tip-line a {
+  color: #6aa9ff;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.tip-line a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
 @media (max-width: 480px) {
   .copy-btn {
     flex: 1 1 100%;

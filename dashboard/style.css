@@ -100,8 +100,8 @@ body::-webkit-scrollbar-thumb:hover {
 
   box-sizing: border-box;
   box-shadow:
-    0 4px 8px rgba(0,0,0,0.45),
-    0 6px 10px rgba(0,0,0,0.35);
+    2px 2px 6px rgba(0,0,0,0.45),
+    2px 2px 8px rgba(0,0,0,0.35);
 }
 
 .dock-header-left {

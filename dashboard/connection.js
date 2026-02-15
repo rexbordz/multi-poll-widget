@@ -462,6 +462,14 @@ function openIntegrationModal() {
           <button class="copy-btn">Copy</button>
         </div>
 
+        <div class="tip-line">
+          <a href="https://github.com/rexbordz/multi-poll-widget/tree/main/streamdeck"
+            target="_blank"
+            rel="noopener noreferrer">
+            Download Stream Deck Profile
+          </a>
+        </div>
+
         <button id="integration-recheck-btn" class="modal-button">
           Recheck
         </button>
