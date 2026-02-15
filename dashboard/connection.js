@@ -152,7 +152,56 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
   sbClient.on("Twitch.ChatMessage", (response) => forward("Twitch.ChatMessage", response));
   sbClient.on("Kick.ChatMessage", (response) => forward("Kick.ChatMessage", response));
   sbClient.on("YouTube.Message", (response) => forward("YouTube.Message", response));
-  sbClient.on("Raw.Action", (response) => forward("Raw.Action", response));
+
+  sbClient.on("Raw.Action", (response) => {
+    const actionId = response?.data?.actionId;
+
+    const dropdown = document.getElementById("duration-dropdown");
+    if (!dropdown) return; // dropdown not on this page
+
+    switch (actionId) {
+
+      // 1) 15s
+      case "ec6fb9ae-1a07-4698-bb44-149e05e11b22":
+        dropdown.value = "15";
+        dropdown.dispatchEvent(new Event("change", { bubbles: true }));
+        break;
+
+      // 2) 30s
+      case "2b2e28da-bbb3-4bfb-9437-965af70a38de":
+        dropdown.value = "30";
+        dropdown.dispatchEvent(new Event("change", { bubbles: true }));
+        break;
+
+      // 3) 1m (60s)
+      case "2399c23b-48a4-470b-853f-ec779fa7b08e":
+        dropdown.value = "60";
+        dropdown.dispatchEvent(new Event("change", { bubbles: true }));
+        break;
+
+      // 4) 2m (120s)
+      case "a4b03917-4298-450a-9b1e-fbc1c3c3bd44":
+        dropdown.value = "120";
+        dropdown.dispatchEvent(new Event("change", { bubbles: true }));
+        break;
+
+      // 5) 10m (600s)
+      case "d09444c9-aac1-4869-b0e5-421ee8ec949a":
+        dropdown.value = "600";
+        dropdown.dispatchEvent(new Event("change", { bubbles: true }));
+        break;
+
+      // 6) Permanent (0)
+      case "87ec91b3-be85-47d2-981c-81125df6d65e":
+        dropdown.value = "0";
+        dropdown.dispatchEvent(new Event("change", { bubbles: true }));
+        break;
+
+      default:
+        forward("Raw.Action", response);
+        break;
+    }
+  });
 
 }
 
@@ -359,6 +408,12 @@ function openConnectionModal(isInitialLoad = false) {
 // =============================
 
 const sbActions = [
+  { id: "ec6fb9ae-1a07-4698-bb44-149e05e11b22", name: "MultiPoll Widget • [Trigger] 1 - 15s Duration" },
+  { id: "2b2e28da-bbb3-4bfb-9437-965af70a38de", name: "MultiPoll Widget • [Trigger] 2 - 30s Duration" },
+  { id: "2399c23b-48a4-470b-853f-ec779fa7b08e", name: "MultiPoll Widget • [Trigger] 3 - 1m Duration" },
+  { id: "a4b03917-4298-450a-9b1e-fbc1c3c3bd44", name: "MultiPoll Widget • [Trigger] 4 - 2m Duration" },
+  { id: "d09444c9-aac1-4869-b0e5-421ee8ec949a", name: "MultiPoll Widget • [Trigger] 5 - 10m Duration" },
+  { id: "87ec91b3-be85-47d2-981c-81125df6d65e", name: "MultiPoll Widget • [Trigger] 6 - Permanent" },
   { id: "8413040f-ee21-439d-be53-b44f55d35998", name: "MultiPoll Widget • [Trigger] Clear " }, 
   { id: "e14a127f-34f6-4091-ba06-a1eb4d387564", name: "MultiPoll Widget • [Trigger] Start/End Poll" }, 
   { id: "705bae3a-36f1-4f42-9bb1-110c8bc5feb7", name: "MultiPoll Widget • [Trigger] Toggle Poll " }, 
