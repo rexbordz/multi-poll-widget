@@ -112,8 +112,8 @@ function initializeStreamerbotConnection(sbAddress, sbPort, sbPassword, warningB
       if (warningBanner) warningBanner.classList.add("hidden");
 
       const activeOverlay = document.querySelector(".modal-overlay");
-        if (activeOverlay) activeOverlay.remove(); 
-
+      if (activeOverlay) activeOverlay.remove();
+      document.body.classList.remove("modal-open");
       
       const response = await sbClient.getActions();
       streamerbotActions = response.actions || [];

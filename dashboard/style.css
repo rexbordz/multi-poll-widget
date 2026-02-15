@@ -83,6 +83,7 @@ body::-webkit-scrollbar-thumb:hover {
 
 /* Header Section*/
 .dock-header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -99,8 +100,8 @@ body::-webkit-scrollbar-thumb:hover {
 
   box-sizing: border-box;
   box-shadow:
-    0 1px 0 rgba(255,255,255,0.05),
-    0 8px 20px rgba(0,0,0,0.6);
+    0 4px 8px rgba(0,0,0,0.45),
+    0 6px 10px rgba(0,0,0,0.35);
 }
 
 .dock-header-left {
@@ -320,19 +321,21 @@ body::-webkit-scrollbar-thumb:hover {
 
 .choice-container {
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr auto; /* input takes remaining space, stats hugs right */
+  display: flex;
   align-items: center;
-  gap: 10px;
 
   border-radius: 6px;
   overflow: hidden;
   background-color: #222;
-  z-index: 0;
 
   max-height: 100px;
   opacity: 1;
-  transition: max-height 0.5s ease, margin 0.5s ease-in-out, opacity 0.4s ease, transform 0.5s ease-in-out;
+
+  transition:
+    max-height 0.5s ease,
+    margin 0.5s ease-in-out,
+    opacity 0.4s ease,
+    transform 0.5s ease-in-out;
 }
 
 /* Winner effect in settings */
@@ -350,11 +353,11 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .choice-input {
-  min-width: 0;              /* CRITICAL for ellipsis inside grid/flex */
   width: 100%;
-  box-sizing: border-box;
+  flex: 1 1 100%;
 
-  padding-right: 0;          /* remove */
+  min-width: 0;
+
   background: transparent !important;
   border: none;
 
@@ -362,20 +365,33 @@ body::-webkit-scrollbar-thumb:hover {
   overflow: hidden;
   text-overflow: ellipsis;
 
-  appearance: none;
-  -webkit-appearance: none;
+  z-index: 2;
 }
 
 .choice-stats {
-  position: static;          /* remove absolute */
-  right: auto;
-  margin-right: 10px;
+  position: absolute;
+  right: 10px;
 
   display: flex;
   gap: 10px;
+
   font-size: 0.85em;
-  white-space: nowrap;       /* keep it on one line */
+  white-space: nowrap;
   pointer-events: none;
+
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(19, 19, 19, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+
+  z-index: 3;
 }
 
 
@@ -411,6 +427,7 @@ body::-webkit-scrollbar-thumb:hover {
 #choices-group.poll-active .choice-stats {
   opacity: 1; /* Force visibility for testing */
   font-weight: 500;
+  transform: translateX(0);
 }
 
 #choices-group.poll-active .gauge-fill.config-page {
