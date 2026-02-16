@@ -76,47 +76,55 @@ U0JBRR+LCAAAAAAABADtXVtvG9mRfg+Q/9BQMMgukKOc+yVAHmzJF3nGji1pJGuieTiXOhTHTTbDi2VN
 
 Just import the code above into your Streamer.bot.
 
-<img width="565" height="152" alt="image" src="https://github.com/user-attachments/assets/75843d78-ae30-47d8-b56d-02cb37533357" />
+<img width="567" height="339" alt="image" src="https://github.com/user-attachments/assets/c806d5cc-49ab-405c-bb69-0ef0ddaf9f20" />
 
 1. **Button triggers** - the buttons that you find on the settings page have corresponding Streamer.bot actions that essentially do the same thing. Very helpful if you want to add a hotkey to the buttons or add them to your stream deck via the Streamer.bot plugin.
+    - MultiPoll Widget • [Trigger] 1 - 15s Duration
+    - MultiPoll Widget • [Trigger] 2 - 30s Duration
+    - MultiPoll Widget • [Trigger] 3 - 1m Duration
+    - MultiPoll Widget • [Trigger] 4 - 2m Duration
+    - MultiPoll Widget • [Trigger] 5 - 10m Duration
+    - MultiPoll Widget • [Trigger] 6 - Permanent
     - MultiPoll Widget • [Trigger] Clear
     - MultiPoll Widget • [Trigger] Start/End Poll
     - MultiPoll Widget • [Trigger] Toggle Poll
+    - MultiPoll Widget • Poll Ended
+    - MultiPoll Widget • Poll Started
     
-    <img width="840" height="643" alt="image" src="https://github.com/user-attachments/assets/b5b8fb03-a30f-4e3a-8142-8195009b687c" />
+    <img width="840" height="643" alt="image" src="https://github.com/user-attachments/assets/d0189318-10b1-4f9d-aed4-c464a0615151" />
 
-    <img width="857" height="264" alt="image" src="https://github.com/user-attachments/assets/801cb649-aad9-49f4-a05f-aeb796c719ef" />
+    <img width="857" height="264" alt="image" src="https://github.com/user-attachments/assets/d3c98bd1-e01d-45c3-977d-ff310231503e" />
     
-    <img width="908" height="772" alt="image" src="https://github.com/user-attachments/assets/128a40dc-71f1-4249-9eca-a7a08870f3b1" />
+2. **Stream Deck Integration-** The actions are also compatible with Stream Deck. Just download the pre-made stream deck profiles I made [here](https://github.com/rexbordz/multi-poll-widget/tree/main/streamdeck), and import the correct variant to your Stream Deck Software.
+    - **Stream Deck + (with action wheel support)**
+        
+        <img width="873" height="560" alt="image" src="https://github.com/user-attachments/assets/bd956bca-1300-4714-bf5b-7a92f9c7cf7d" />
+        
+    - **Stream Deck XL**
+        
+        <img width="880" height="549" alt="image" src="https://github.com/user-attachments/assets/3be8267b-142e-483c-bfc2-423ca19b872d" />
+   
+3. **MultiPoll Widget Bot Messages  -** When these are enabled, the widget automatically sends a bot message to all the platforms that it supports when a poll starts and ends. You can enable/disable the action or sub-actions inside it as you want.
+    
+    <img width="666" height="333" alt="image" src="https://github.com/user-attachments/assets/f43a662e-83b2-4699-a22a-449443498de6" />
 
+> [!TIP]
+> When you right click a **MultiPoll Widget • Poll Started** trigger and click **Requeue**, it will run that poll again with the same settings.
+
+<img width="1186" height="767" alt="image" src="https://github.com/user-attachments/assets/ab9d53e0-b881-4147-969a-27dabad054b7" />
+
+> [!TIP]
+> You can also get the import code and the download link for the stream deck profiles through this button. It will also show you the status of all the Streamer.bot actions associated with the poll. A yellow dot at the bottom right suggests that you're missing at least one action
+
+<p align="center">
+<img width="643" height="601" alt="image" src="https://github.com/user-attachments/assets/c86e5a99-e98d-4544-a32a-e38c4abee242" />
     
-2. **MultiPoll Widget • Bot Messages  -** When this is enabled, the widget automatically sends a bot message to all the platforms that it supports when a poll starts and ends. You can enable/disable the action or sub-actions inside it as you want.
-    
-    <img width="1190" height="640" alt="image" src="https://github.com/user-attachments/assets/df67149b-ac68-4115-87a6-e5d7eb88a0cb" />
+<img width="485" height="573" alt="image" src="https://github.com/user-attachments/assets/8e4a0c58-0abc-4beb-b36e-fd5e8eedb54a" />
+</p>>
 
 ---
 
-## **⚙️ Custom Settings**
-
-You can kind of customize the widget by adding these parameters at the end of the URL:
-
-**Custom Streamer.bot Address:**
-
-```xml
-?address=[Insert custom address here]
-```
-
-**Custom Streamer.bot Port:**
-
-```xml
-?port=[Insert custom port here]
-```
-
-So with custom settings, your browser source link should look like this:
-
-`widget-link.com?alignRight=false?address=127.0.0.2?port=8081`
-
-### 🎨 Customizing the Overlay
+## 🎨 Customizing the Overlay
 
 Copy and paste this to the source’s **custom CSS** and adjust the values. I made the variable names self-explanatory so I don’t need to explain what they all change:
 
@@ -127,7 +135,7 @@ Copy and paste this to the source’s **custom CSS** and adjust the values. I ma
   --card-pad: 25px;
   --card-shadow: 0 4px 10px rgba(0,0,0,0.4);
 
-  --font: 'InterVariable', 'Inter', sans-serif;
+	--font: 'InterVariable', 'Inter', sans-serif;
   --font-size: 18px;
   --text-color: #fff;
   
@@ -138,9 +146,9 @@ Copy and paste this to the source’s **custom CSS** and adjust the values. I ma
   --color-choice-5: #f97316;
 }
 ```
-<p align="center">
-    <img width="893" height="1013" alt="image" src="https://github.com/user-attachments/assets/30d82eaa-c07e-4f52-809f-38384ced13c5" />
-</p>
+
+<img width="893" height="1013" alt="image" src="https://github.com/user-attachments/assets/12a8cfd6-99e3-4269-bcc9-c8c8f92f1d34" />
+
 ---
 
 ## 💝 Donate
