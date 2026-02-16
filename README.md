@@ -120,7 +120,7 @@ Just import the code above into your Streamer.bot.
 <img width="643" height="601" alt="image" src="https://github.com/user-attachments/assets/c86e5a99-e98d-4544-a32a-e38c4abee242" />
     
 <img width="485" height="573" alt="image" src="https://github.com/user-attachments/assets/8e4a0c58-0abc-4beb-b36e-fd5e8eedb54a" />
-</p>>
+</p>
 
 ---
 
