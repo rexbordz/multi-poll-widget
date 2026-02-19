@@ -153,7 +153,9 @@ Copy and paste this to the source’s **custom CSS** and adjust the values. I ma
 
 ## 💝 Donate
 
-Your donations help me create better content and improve stream quality! If you'd like to support my work and see more of it, you can donate through any of the following:
+Your donations help me create better content and improve stream quality! If you'd like to support my work and see more of it, you can donate through the following:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M3C7R1J)
 
 ---
 
