@@ -38,7 +38,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
     <img width="1201" height="974" alt="image" src="https://github.com/user-attachments/assets/f58e8a21-b4a5-4106-80cd-a61b0e2b2406" />
   
   > [!NOTE]
-  > <img src="https://github.com/user-attachments/assets/c427e0a9-05af-4fd3-b620-7e5158f81f8d" style="height: 1.5em; vertical-align: middle;"> **Patreon Supporter Exclusive** - **Paid** Patreon members can have access to the **PRO** version of this widget which enables you to add **up to 10 choices** to the poll. You can get the pro version link in my **[Discord server](https://discord.com/channels/789352409473875988/1406278242582790224)**. <br><br>
+  > <img src="https://github.com/user-attachments/assets/c427e0a9-05af-4fd3-b620-7e5158f81f8d" style="height: 1.5em; vertical-align: middle;"> **Patreon Supporter Exclusive** - **Paid** Patreon members can have access to the **PRO** version of this widget which enables you to add **up to 10 choices** to the poll. You can get the pro version link in my **[Discord server](https://discord.com/channels/1490596895125405857/1492060169713225748)**. <br><br>
   > **[Click here to be a paid member](https://www.patreon.com/rexbordz)**
   
   > [!TIP]
@@ -52,7 +52,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
     <img width="1052" height="623" alt="image" src="https://github.com/user-attachments/assets/bac659a5-fe9e-4db1-ab3f-0e555ca8bf3d" />
     
   > [!NOTE]
-  > <img src="https://github.com/user-attachments/assets/c427e0a9-05af-4fd3-b620-7e5158f81f8d" style="height: 1.5em; vertical-align: middle;"> **Patreon Supporter Exclusive** - **Paid** Patreon members can have access to the **PRO** version of this widget which enables you to add **up to 10 choices** to the poll. You can get the pro version link in my **[Discord server](https://discord.com/channels/789352409473875988/1406278242582790224)**. <br><br>
+  > <img src="https://github.com/user-attachments/assets/c427e0a9-05af-4fd3-b620-7e5158f81f8d" style="height: 1.5em; vertical-align: middle;"> **Patreon Supporter Exclusive** - **Paid** Patreon members can have access to the **PRO** version of this widget which enables you to add **up to 10 choices** to the poll. You can get the pro version link in my **[Discord server](https://discord.com/channels/1490596895125405857/1492060169713225748)**. <br><br>
   > **[Click here to be a paid member](https://www.patreon.com/rexbordz)**
     
 5. Start a poll using the settings page. First two choices are required. When you’re ready, just click **`Start Poll`**.
@@ -163,7 +163,7 @@ Your donations help me create better content and improve stream quality! If you'
 
 For technical support or inquiries, please contact me through my Discord channel:
 
-- <img src="https://github.com/user-attachments/assets/99e66009-11f1-4bcc-a06f-aa5c2f90524a" style="height: 1.5em;"> **[Discord Server](https://discord.gg/pJWEPzbdfa)**
+- <img src="https://github.com/user-attachments/assets/99e66009-11f1-4bcc-a06f-aa5c2f90524a" style="height: 1.5em;"> **[Discord Server](https://discord.gg/cgufFBJKY7)**
 
     You can ask questions in the [🗨️❓│support forum](https://discord.com/channels/789352409473875988/1327979423835623464) or  [#❓│support channel](https://discord.com/channels/789352409473875988/800788710789742622)
     
