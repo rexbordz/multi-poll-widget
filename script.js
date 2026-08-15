@@ -80,8 +80,8 @@
   const titleElement = document.querySelector(".poll-card .title");
   const choicesContainer = document.querySelector(".choices");
 
-  const CHOICE_COLORS = ["choice-1", "choice-2", "choice-3", "choice-4", "choice-5"];
-  const FLASH_COLORS = ["flash-choice-1", "flash-choice-2", "flash-choice-3", "flash-choice-4", "flash-choice-5"];
+  const CHOICE_COLORS = ["choice-1", "choice-2", "choice-3", "choice-4", "choice-5", "choice-6", "choice-7", "choice-8", "choice-9", "choice-10"];
+  const FLASH_COLORS = ["flash-choice-1", "flash-choice-2", "flash-choice-3", "flash-choice-4", "flash-choice-5", "flash-choice-6", "flash-choice-7", "flash-choice-8", "flash-choice-9", "flash-choice-10"];
 
   let isPollActive = false; // render-side bookkeeping only, for togglePoll's blank-state check — not a decision-maker
   let lastStats = []; // previous liveStatsUpdate, kept only to detect which choice changed for the vote-key flash
@@ -106,7 +106,7 @@
       const choiceText = choice.text || `Choice ${i + 1}`;
 
       choiceDiv.innerHTML = `
-        <div class="vote-key">${i + 1}</div>
+        <div class="vote-key">${i === 9 ? 0 : i + 1}</div>
         <div class="choice-main">
           <div class="choice-label">
             <div class="choice-text">${choiceText}</div>

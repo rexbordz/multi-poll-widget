@@ -28,8 +28,14 @@
     </div>
 
     <div class="widget-actions">
+      <!-- Saved Polls Button (PRO feature — opens the upsell modal here) -->
+      <button class="action-btn saved-polls-btn"
+              title="Saved Polls">
+        <wa-icon name="bookmark"></wa-icon>
+      </button>
+
       <!-- Integration Check Button -->
-      <button class="action-btn integration-check" 
+      <button class="action-btn integration-check"
               title="Optional Streamer.bot Actions Status">
         <wa-icon name="bolt-lightning"></wa-icon>
       </button>
@@ -104,6 +110,9 @@
           <span class="percent config-page">0%</span>
         </div>
       </div>
+
+      <!-- 6-10 more choices is a PRO feature — opens the upsell modal here instead of adding a row. -->
+      <button type="button" id="add-choice-btn" class="add-choice"><wa-icon name="plus"></wa-icon></button>
     </div>
 
     <!-- Duration -->
@@ -188,6 +197,29 @@
     </div>
 
     <button id="integration-recheck-btn" class="modal-button" autofocus>Recheck</button>
+  </wa-dialog>
+
+  <!-- Locked Feature Modal — shown by PRO-only controls (add-choice, saved polls) on the free build. -->
+  <wa-dialog id="locked-feature-dialog" label="Locked Feature" class="locked-feature-dialog">
+    <p class="locked-feature-intro">
+      This feature is for PRO version only. Get the Pro version by subscribing Tier 2 (10$) on
+      rexbordz's Patreon and have access to the following features:
+    </p>
+
+    <ul class="locked-feature-list">
+      <li>Add up to 10 choices</li>
+      <li>Save up to 10 polls as presets</li>
+    </ul>
+
+    <p class="locked-feature-note">
+      Note: You only need to subscribe and authenticate ONCE and the PRO version is yours.
+      No monthly commitment needed.
+    </p>
+
+    <wa-button class="locked-feature-cta" variant="brand"
+      href="https://www.patreon.com/rexbordz/membership" target="_blank" rel="noopener noreferrer">
+      Buy PRO
+    </wa-button>
   </wa-dialog>
 
   <script type="module" src="scripts/index.js"></script>

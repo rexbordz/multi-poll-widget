@@ -49,6 +49,11 @@
   --color-choice-3: #22c55e;
   --color-choice-4: #eab308;
   --color-choice-5: #f97316;
+  --color-choice-6: #a855f7;
+  --color-choice-7: #1a9284;
+  --color-choice-8: #ec4899;
+  --color-choice-9: #84cc16;
+  --color-choice-10: #6366f1;
 }
 
 html, body, * {
@@ -158,12 +163,22 @@ html {
 .vote-key.flash-choice-3  { background-color: color-mix(in srgb, var(--color-choice-3) 60%, white); }
 .vote-key.flash-choice-4 { background-color: color-mix(in srgb, var(--color-choice-4) 70%, white); }
 .vote-key.flash-choice-5 { background-color: color-mix(in srgb, var(--color-choice-5) 70%, white); }
+.vote-key.flash-choice-6 { background-color: color-mix(in srgb, var(--color-choice-6) 70%, white); }
+.vote-key.flash-choice-7   { background-color: color-mix(in srgb, var(--color-choice-7) 70%, white); }
+.vote-key.flash-choice-8   { background-color: color-mix(in srgb, var(--color-choice-8) 70%, white); }
+.vote-key.flash-choice-9   { background-color: color-mix(in srgb, var(--color-choice-9) 70%, white); }
+.vote-key.flash-choice-10   { background-color: color-mix(in srgb, var(--color-choice-10) 70%, white); }
 
 .vote-key.flash-choice-1,
 .vote-key.flash-choice-2,
 .vote-key.flash-choice-3,
 .vote-key.flash-choice-4,
-.vote-key.flash-choice-5 {
+.vote-key.flash-choice-5,
+.vote-key.flash-choice-6,
+.vote-key.flash-choice-7,
+.vote-key.flash-choice-8,
+.vote-key.flash-choice-9,
+.vote-key.flash-choice-10  {
   transform: translate(1px, 1px) scale(0.96);
 }
 
@@ -172,6 +187,11 @@ html {
 .vote-key.choice-3 { background-color: var(--color-choice-3); }
 .vote-key.choice-4 { background-color: var(--color-choice-4); }
 .vote-key.choice-5 { background-color: var(--color-choice-5); }
+.vote-key.choice-6 { background-color: var(--color-choice-6); }
+.vote-key.choice-7 { background-color: var(--color-choice-7); }
+.vote-key.choice-8 { background-color: var(--color-choice-8); }
+.vote-key.choice-9 { background-color: var(--color-choice-9); }
+.vote-key.choice-10 { background-color: var(--color-choice-10); }
 
 .vote-key .winner-icon {
   font-size: 1.1em;
@@ -219,11 +239,16 @@ html {
   transition: width 0.5s ease;
 }
 
-.gauge-fill.choice-1 { background: var(--color-choice-1); }
-.gauge-fill.choice-2 { background: var(--color-choice-2); }
-.gauge-fill.choice-3 { background: var(--color-choice-3); }
-.gauge-fill.choice-4 { background: var(--color-choice-4); }
-.gauge-fill.choice-5 { background: var(--color-choice-5); }
+.gauge-fill.choice-1   { background-color: var(--color-choice-1); }
+.gauge-fill.choice-2    { background-color: var(--color-choice-2); }
+.gauge-fill.choice-3  { background-color: var(--color-choice-3); }
+.gauge-fill.choice-4 { background-color: var(--color-choice-4); }
+.gauge-fill.choice-5 { background-color: var(--color-choice-5); }
+.gauge-fill.choice-6 { background-color: var(--color-choice-6); }
+.gauge-fill.choice-7   { background-color: var(--color-choice-7); }
+.gauge-fill.choice-8   { background-color: var(--color-choice-8); }
+.gauge-fill.choice-9   { background-color: var(--color-choice-9); }
+.gauge-fill.choice-10   { background-color: var(--color-choice-10); }
 
 .choice-right {
   display: flex;

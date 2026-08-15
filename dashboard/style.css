@@ -185,7 +185,7 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
+  gap: 3px;
 }
 
 .dock-header button {
@@ -212,6 +212,54 @@ body::-webkit-scrollbar-thumb:hover {
   justify-content: center;
 
   cursor: pointer;
+}
+
+.saved-polls-btn {
+  background: none !important;
+  border: none !important;
+  position: relative;
+  color: #bbb;
+  box-shadow: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.saved-polls-btn wa-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 18px;
+}
+
+/* Colorless ripple — same expanding-circle technique as .integration-check::before. */
+.saved-polls-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.15);
+
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.saved-polls-btn:hover::before {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.saved-polls-btn.action-btn:hover {
+  background: none !important;
+  color: #fff;
+  transform: none;
 }
 
 .integration-check {
@@ -311,6 +359,7 @@ body::-webkit-scrollbar-thumb:hover {
   transition: background-color 0.3s ease;
   padding: 0;
   display: block;
+  margin-left: 5px;
 }
 
 /* The Overlay Circle */
@@ -549,6 +598,33 @@ wa-select wa-option[value="custom"] {
   text-overflow: ellipsis;
 
   z-index: 2;
+}
+
+/* Add-choice button — dashboard's own choice list is capped at 5 (choices 6-10 are a PRO
+   feature). Clicking it opens the Locked Feature modal instead of adding a row. */
+.add-choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  padding: 10px;
+
+  font-size: 1rem;
+  font-weight: bold;
+
+  background-color: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.add-choice:hover {
+  background-color: #1c1c1c;
+  border-color: #3b82f6;
+  color: #fff;
 }
 
 .choice-stats {

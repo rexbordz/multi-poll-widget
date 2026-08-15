@@ -300,6 +300,52 @@ wa-dialog::part(close-button__base):hover {
   border: 1px solid rgba(239,68,68,0.3);
 }
 
+/* Locked Feature Modal — upsell shown by PRO-only controls (add-choice, saved polls) on the free build. */
+
+#locked-feature-dialog::part(body) {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.locked-feature-intro {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.locked-feature-list {
+  margin: 0;
+  padding: 12px 12px 12px 32px;
+
+  background: #101010;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  font-size: 0.9rem;
+}
+
+.locked-feature-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #bbb;
+  line-height: 1.5;
+}
+
+.locked-feature-cta {
+  display: block;
+  width: 100%;
+}
+
+.locked-feature-cta::part(base) {
+  width: 100%;
+}
+
 .hidden {
   display: none;
 }

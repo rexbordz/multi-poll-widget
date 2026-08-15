@@ -25,6 +25,7 @@ export function createConnectionUI({ getConnection, loadConnectionSettings }) {
 
   const connectionDialog = document.getElementById("connection-dialog");
   const sbActionsDialog = document.getElementById("sb-actions-dialog");
+  const lockedFeatureDialog = document.getElementById("locked-feature-dialog");
 
   const warningBanner = connectionDialog.querySelector(".modal-warning");
   const addressInput = connectionDialog.querySelector("#sb-address");
@@ -66,7 +67,7 @@ export function createConnectionUI({ getConnection, loadConnectionSettings }) {
   // =============================
 
   function openConnectionModal() {
-    if (connectionDialog.open || sbActionsDialog.open) return;
+    if (connectionDialog.open || sbActionsDialog.open || lockedFeatureDialog.open) return;
 
     const saved = loadConnectionSettings();
     addressInput.value = saved.address;
@@ -216,7 +217,7 @@ export function createConnectionUI({ getConnection, loadConnectionSettings }) {
   recheckBtn.addEventListener("click", recheckIntegration);
 
   function openIntegrationModal() {
-    if (connectionDialog.open || sbActionsDialog.open) return;
+    if (connectionDialog.open || sbActionsDialog.open || lockedFeatureDialog.open) return;
 
     renderActionsList();
     refreshIntegrationDisplay();
@@ -226,6 +227,21 @@ export function createConnectionUI({ getConnection, loadConnectionSettings }) {
   }
 
   sbActionsDialog.addEventListener("wa-after-hide", () => {
+    document.body.classList.remove("modal-open");
+  });
+
+  // =============================
+  // Locked Feature Modal (PRO upsell)
+  // =============================
+
+  function openLockedFeatureModal() {
+    if (connectionDialog.open || sbActionsDialog.open || lockedFeatureDialog.open) return;
+
+    document.body.classList.add("modal-open");
+    lockedFeatureDialog.open = true;
+  }
+
+  lockedFeatureDialog.addEventListener("wa-after-hide", () => {
     document.body.classList.remove("modal-open");
   });
 
@@ -273,6 +289,16 @@ export function createConnectionUI({ getConnection, loadConnectionSettings }) {
     const integrationBtn = document.querySelector(".integration-check");
     if (integrationBtn) {
       integrationBtn.addEventListener("click", openIntegrationModal);
+    }
+
+    const savedPollsBtn = document.querySelector(".saved-polls-btn");
+    if (savedPollsBtn) {
+      savedPollsBtn.addEventListener("click", openLockedFeatureModal);
+    }
+
+    const addChoiceBtn = document.getElementById("add-choice-btn");
+    if (addChoiceBtn) {
+      addChoiceBtn.addEventListener("click", openLockedFeatureModal);
     }
 
     // Auto-open the connection modal on first load, same as before
