@@ -1,10 +1,5 @@
 /* Your custom variables */
 :root {
-  --card-bg: rgba(23, 23, 23, 0.98);
-  --card-radius: 24px;
-  --card-pad: 25px;
-  --card-shadow: 0 4px 10px rgba(0,0,0,0.4);
-
   --font: 'InterVariable', 'Inter', sans-serif;
   --font-size: 18px;
   --text-color: #fff;
@@ -15,6 +10,9 @@
   --color-choice-3: #22c55e;
   --color-choice-4: #eab308;
   --color-choice-5: #f97316;
+
+  /* Shared placeholder color for wa-input and the native choice inputs. */
+  --placeholder-color: #9a9a9a;
 }
 
 html, body, * {
@@ -33,7 +31,7 @@ body {
 
 /* Scrollbar size */
 body::-webkit-scrollbar,
-.modal-body::-webkit-scrollbar,
+wa-dialog::part(body)::-webkit-scrollbar,
 .code::-webkit-scrollbar {
   height: 10px; /* horizontal scrollbar */
   width: 10px;
@@ -56,6 +54,51 @@ body::-webkit-scrollbar-thumb:hover {
   background-color: #777;
 }
 
+/* Loading overlay — shown until the WA custom elements upgrade, so the user never sees a pre-upgrade flash. */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  background-color: #181818;
+
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-logo {
+  width: 86px;
+  height: 86px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 8px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: loading-spinner-spin 0.75s linear infinite;
+}
+
+@keyframes loading-spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Settings Page */
 .rexbordz-logo {
   width: 32px;
@@ -70,7 +113,7 @@ body::-webkit-scrollbar-thumb:hover {
   background-color: #181818;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 10px;
   box-sizing: border-box; /* include padding in width */
 }
 
@@ -129,7 +172,7 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 14px;
+  gap: 5px;
 }
 
 .dock-header button {
@@ -191,8 +234,7 @@ body::-webkit-scrollbar-thumb:hover {
     0 0 4px rgba(234, 179, 8, 0.8),
     0 0 8px rgba(234, 179, 8, 0.4);
     
-  /* Ensure it doesn't move with the icon rotation if preferred, 
-     but keeping it attached looks more integrated */
+  /* Kept attached rather than static-positioned — reads as more integrated */
 }
 
 /* To hide the indicator, simply remove the .warning class via JS */
@@ -277,46 +319,128 @@ body::-webkit-scrollbar-thumb:hover {
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 .input-group label {
   font-weight: bold;
   font-size: 0.95em;
+  margin-bottom: 5px;
 }
 
-.input-group input,
-.input-group select {
-  width: 100%;  /* full width */
-  box-sizing: border-box; /* padding included in width */
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
-  background-color: #222;
+/* WA custom elements render unstyled until they upgrade — hide until then. */
+wa-input:not(:defined),
+wa-select:not(:defined),
+wa-option:not(:defined),
+wa-number-input:not(:defined) {
+  visibility: hidden;
+}
+
+/* Host-level reset — WA's default margin-block would stack on top of .input-group's flex `gap`. */
+.input-group wa-input,
+.input-group wa-select,
+.input-group wa-number-input {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+/* Shared WA input theming — also used by the connection modal, one definition for both. */
+wa-input::part(input-wrapper) {
+  background: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+wa-input::part(input) {
   color: #fff;
+}
+
+wa-input::part(input)::placeholder {
+  color: var(--placeholder-color);
+}
+
+wa-input::part(form-control-label) {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #bbb;
+  margin-bottom: 8px;
+}
+
+wa-select::part(combobox) {
+  background: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+wa-select::part(listbox) {
+  background: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+wa-select::part(display-input) {
+  color: #fff;
+}
+
+wa-number-input::part(number-input) {
+  background: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+wa-number-input::part(input) {
+  color: #fff;
+}
+
+wa-number-input::part(input)::placeholder {
+  color: var(--placeholder-color);
+}
+
+/* Match the settings page's original native-input sizing — the modal's own inputs keep WA's default size. */
+.settings-container wa-input::part(input-wrapper),
+.settings-container wa-select::part(combobox),
+.settings-container wa-number-input::part(number-input) {
+  min-height: 0;
+  height: auto;
+  padding: 8px 12px;
+}
+
+/* The settings page uses external <label> elements, not WA's slotted
+   label — so the label part is never actually rendered here, but its
+   margin-bottom still reserves the space underneath every control,
+   stacking on top of .input-group's own `gap` and widening the visual
+   spacing beyond what the flex gap value alone would suggest. */
+.settings-container wa-input::part(form-control-label),
+.settings-container wa-select::part(form-control-label),
+.settings-container wa-number-input::part(form-control-label) {
+  margin-bottom: 0;
+}
+
+.settings-container wa-input::part(input),
+.settings-container wa-select::part(display-input),
+.settings-container wa-number-input::part(input) {
+  padding: 0;
+  line-height: 1.2;
   font-size: 0.95em;
 }
 
-.input-group input:focus,
-.input-group select:focus {
-  outline: 2px solid #3b82f6; /* bright blue */
-  outline-offset: 2px;         /* space between outline and element */
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); /* optional subtle glow */
+/* Programmatic-only entry, never clickable. Not `disabled` — wa-select rejects .value being set to a disabled option. */
+wa-select wa-option[value="custom"] {
+  display: none;
 }
 
-.input-group .choice-input:focus {
+.choice-input:focus {
   outline: none;
-  box-shadow: none;
 }
 
 .choice-container:focus-within {
-  outline: 2px solid #3b82f6; /* bright blue */
-  outline-offset: 2px;         /* space between outline and element */
-  box-shadow: 0 0 6px rgba(59, 130, 246, 0.5); /* optional subtle glow */
+  outline: var(--wa-focus-ring);
+  outline-offset: var(--wa-focus-ring-offset);
 }
 
-.input-group input::placeholder {
-  color: #696969;
+.choice-input::placeholder {
+  color: var(--placeholder-color);
 }
 
 .choice-container {
@@ -324,9 +448,10 @@ body::-webkit-scrollbar-thumb:hover {
   display: flex;
   align-items: center;
 
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
-  background-color: #222;
+  background-color: #101010;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 
   max-height: 100px;
   opacity: 1;
@@ -357,6 +482,9 @@ body::-webkit-scrollbar-thumb:hover {
   flex: 1 1 100%;
 
   min-width: 0;
+
+  padding: 8px 12px;
+  font-size: 0.95em;
 
   background: transparent !important;
   border: none;
@@ -416,11 +544,11 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 /* Color overrides for the config-page version of the gauges */
-.gauge-fill.config-page.choice-1 { background-color: var(--color-choice-1); opacity: 0.5; }
-.gauge-fill.config-page.choice-2 { background-color: var(--color-choice-2); opacity: 0.5; }
-.gauge-fill.config-page.choice-3 { background-color: var(--color-choice-3); opacity: 0.5; }
-.gauge-fill.config-page.choice-4 { background-color: var(--color-choice-4); opacity: 0.5; }
-.gauge-fill.config-page.choice-5 { background-color: var(--color-choice-5); opacity: 0.5; }
+.gauge-fill.config-page.choice-1 { background-color: var(--color-choice-1); opacity: 0.65; }
+.gauge-fill.config-page.choice-2 { background-color: var(--color-choice-2); opacity: 0.65; }
+.gauge-fill.config-page.choice-3 { background-color: var(--color-choice-3); opacity: 0.65; }
+.gauge-fill.config-page.choice-4 { background-color: var(--color-choice-4); opacity: 0.65; }
+.gauge-fill.config-page.choice-5 { background-color: var(--color-choice-5); opacity: 0.65; }
 
 /* When poll is ACTIVE (we will toggle this class via JS) */
 /* Update this block in your CSS */
@@ -459,7 +587,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 .choice-header label {
-  margin: 0; /* removes default label margins */
+  margin-bottom: 5px; 
 }
 
 .time-remaining {
@@ -496,12 +624,12 @@ body::-webkit-scrollbar-thumb:hover {
   padding: 10px 0;
   border: none;
   border-radius: 8px;
-  background-color: #555;
+  background: linear-gradient(180deg, #3d3d3d, #292929);
   color: #fff;
   cursor: pointer;
   font-weight: bolder;
   font-size: 0.9rem;
-  transition: background-color 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 button {
@@ -539,32 +667,26 @@ button {
 }
 
 #start-end-poll {
-  background-color: #284cb8; /* Original blue */
+  /* Electric-blue gradient — same blue family as the logo, subtle rather than neon. */
+  background: linear-gradient(180deg, #3b82f6, #1c3faa);
   color: #fff;
   position: relative; /* Required for the pseudo-element */
   overflow: hidden; /* Ensures the overlay stays within rounded corners */
-  transition: background-color 0.3s ease;
+  transition: filter 0.2s ease;
   cursor: pointer;
 }
 
-#start-end-poll::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(255, 255, 255, 0); /* Invisible by default */
-  transition: background-color 0.3s ease; /* Smooth transition */
-  pointer-events: none; /* Allows clicks to pass through to the button */
+#start-end-poll:hover {
+  filter: brightness(1.1);
 }
 
-#start-end-poll:hover::after {
-  background-color: rgba(255, 255, 255, 0.15); /* Subtle white overlay on hover */
+/* "End Poll"/"Closing" state — a class, not inline background-color, which the gradient would paint over. */
+#start-end-poll.is-ending {
+  background: linear-gradient(180deg, #ef4444, #7f1d1d);
 }
 
 .button-group button:hover {
-  background-color: #777;
+  background: linear-gradient(180deg, #484848, #333333);
 }
 
 /* Small screen adjustments */

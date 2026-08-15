@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="wa-dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,8 +8,15 @@
   <link rel="stylesheet" href="modal.css">
   <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
   <script src="https://cdn.jsdelivr.net/npm/@streamerbot/client/dist/streamerbot-client.min.js"></script>
+  <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.11.0/styles/themes/default.css">
+  <script type="module" src="https://ka-f.webawesome.com/webawesome@3.11.0/webawesome.loader.js"></script>
 </head>
 <body>
+  <div id="loading-overlay">
+    <img src="../assets/images/circle-logo.png" alt="" class="loading-logo">
+    <div class="loading-spinner"></div>
+  </div>
+
   <h1 class="dock-header">
     <div class="dock-header-left">
       <div class="widget-title">
@@ -41,7 +48,7 @@
     <!-- Poll Title -->
     <div class="input-group">
       <label for="poll-title">Poll Title</label>
-      <input type="text" id="poll-title" placeholder="Type number (1, 2...) in chat to vote">
+      <wa-input type="text" id="poll-title" placeholder="Type number (1, 2...) in chat to vote"></wa-input>
     </div>
 
     <!-- Choices -->
@@ -105,16 +112,16 @@
     <!-- Duration -->
     <div class="input-group">
       <label for="duration-dropdown">Poll Duration</label>
-      <select id="duration-dropdown">
-        <option value="15">15s</option>
-        <option value="30" >30s</option>
-        <option value="60">1m</option>
-        <option value="120">2m</option>
-        <option value="600">10m</option>
-        <option value="0" selected>Permanent</option>
-        <option value="custom" disabled hidden>Custom</option> <!-- optional -->
-      </select>
-      <input type="number" id="duration-input" placeholder="Custom seconds">
+      <wa-select id="duration-dropdown" value="0">
+        <wa-option value="15">15s</wa-option>
+        <wa-option value="30">30s</wa-option>
+        <wa-option value="60">1m</wa-option>
+        <wa-option value="120">2m</wa-option>
+        <wa-option value="600">10m</wa-option>
+        <wa-option value="0">Permanent</wa-option>
+        <wa-option value="custom">Custom</wa-option> <!-- programmatic-only, hidden via CSS; NOT disabled — wa-select rejects setting .value to a disabled option's value -->
+      </wa-select>
+      <wa-number-input id="duration-input" min="0" placeholder="Custom seconds"></wa-number-input>
     </div>
 
     <!-- Buttons -->
@@ -124,7 +131,68 @@
       <button id="reset-poll">Clear</button>
     </div>
   </div>
-  <script src="script.js"></script>
-  <script src="connection.js"></script>
+
+  <!-- Connection Modal -->
+  <wa-dialog id="connection-dialog" class="connection-dialog">
+    <div slot="label" class="modal-header-left">
+      <img src="../assets/images/streamerbot-logo.svg" class="modal-icon" alt="logo">
+      <span class="modal-title">MULTIPOLL</span>
+    </div>
+
+    <div class="modal-warning hidden">
+      Disconnected from Streamer.bot
+    </div>
+
+    <div class="form-row two-cols">
+      <div class="form-group">
+        <label for="sb-address">Address <span class="required">*</span></label>
+        <input type="text" id="sb-address">
+      </div>
+
+      <div class="form-group">
+        <label for="sb-port">Port <span class="required">*</span></label>
+        <input type="text" id="sb-port">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full">
+        <wa-input id="sb-password" type="password" password-toggle>
+          <span slot="label">Password</span>
+        </wa-input>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <button class="modal-button" id="connect-btn" type="button" autofocus>Connect</button>
+    </div>
+  </wa-dialog>
+
+  <!-- Streamer.bot Integration-Check Modal -->
+  <wa-dialog id="sb-actions-dialog" label="Streamer.bot Integration" class="sb-actions-dialog">
+    <div class="status-text">Some actions are not found</div>
+
+    <div class="actions-list"></div>
+
+    <div class="import-label">Import the following to Streamer.bot:</div>
+
+    <div class="code-row">
+      <div class="code" id="codeBox"></div>
+      <wa-copy-button id="import-copy-btn" class="copy-btn"
+        copy-label="Copy" success-label="Copied!" error-label="Failed to copy"></wa-copy-button>
+    </div>
+
+    <div class="tip-line">
+      <a href="https://github.com/rexbordz/multi-poll-widget/tree/main/streamdeck"
+        target="_blank"
+        rel="noopener noreferrer">
+        Download Stream Deck Profile
+      </a>
+    </div>
+
+    <button id="integration-recheck-btn" class="modal-button" autofocus>Recheck</button>
+  </wa-dialog>
+
+  <script type="module" src="scripts/index.js"></script>
 </body>
 </html>

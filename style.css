@@ -167,6 +167,22 @@ html {
   transform: translate(1px, 1px) scale(0.96);
 }
 
+.vote-key.choice-1 { background-color: var(--color-choice-1); }
+.vote-key.choice-2 { background-color: var(--color-choice-2); }
+.vote-key.choice-3 { background-color: var(--color-choice-3); }
+.vote-key.choice-4 { background-color: var(--color-choice-4); }
+.vote-key.choice-5 { background-color: var(--color-choice-5); }
+
+.vote-key .winner-icon {
+  font-size: 1.1em;
+  animation: winner-icon-beat 1s ease-in-out infinite;
+}
+
+@keyframes winner-icon-beat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+
 .choice-main {
   display: flex;
   flex-direction: column;
