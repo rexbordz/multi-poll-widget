@@ -12,7 +12,7 @@
   --color-choice-5: #f97316;
 
   /* Shared placeholder color for wa-input and the native choice inputs. */
-  --placeholder-color: #9a9a9a;
+  --placeholder-color: #494d57;
 
   /* Shared with .copy-btn (modal.css) so it always matches .modal-button. */
   --modal-button-bg: linear-gradient(180deg, #3d3d3d, #292929);
