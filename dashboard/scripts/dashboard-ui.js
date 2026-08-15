@@ -114,7 +114,10 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
 
     const inputs = document.querySelectorAll(".choice-input");
     choicesArray.forEach((choice, i) => {
-      if (inputs[i]) inputs[i].value = choice.text;
+      if (inputs[i]) {
+        inputs[i].value = choice.text;
+        if (choice.text.trim() !== "") clearRequiredMissing(inputs[i]);
+      }
     });
 
     applyDurationPreset(String(duration));
@@ -138,6 +141,7 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
       const storageKey = `${STORAGE_PREFIX}${field.id || index}`;
       localStorage.removeItem(storageKey);
       field.value = DEFAULT_CHOICE_VALUES[choiceIndex] || "";
+      if (field.classList.contains("choice-input")) clearRequiredMissing(field);
     });
   }
 
@@ -163,11 +167,36 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
     });
   }
 
+  // ---- Required-choice validation ----
+
+  function clearRequiredMissing(input) {
+    input.closest(".choice-container")?.classList.remove("required-missing");
+  }
+
+  function bindRequiredValidation() {
+    document.querySelectorAll(".choice-input[required]").forEach((input) => {
+      input.addEventListener("input", () => {
+        if (input.value.trim() !== "") clearRequiredMissing(input);
+      });
+    });
+  }
+
+  function markRequiredMissing() {
+    document.querySelectorAll(".choice-input[required]").forEach((input) => {
+      if (input.value.trim() === "") {
+        input.closest(".choice-container")?.classList.add("required-missing");
+      }
+    });
+  }
+
   function startEndPoll() {
     if (startEndBtn.textContent === "Start Poll") {
       const requiredInputs = document.querySelectorAll(".choice-input[required]");
       const allFilled = Array.from(requiredInputs).every((input) => input.value.trim() !== "");
-      if (!allFilled) return;
+      if (!allFilled) {
+        markRequiredMissing();
+        return;
+      }
 
       const pollData = readPollData();
       if (!pollData) return;
@@ -317,6 +346,7 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
     bindPersistentStorage();
     bindDurationSync();
     bindButtons();
+    bindRequiredValidation();
   }
 
   return {
