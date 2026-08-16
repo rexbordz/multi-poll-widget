@@ -32,7 +32,6 @@
   font-style: normal;
 }
 
-/* Your custom variables */
 :root {
   --card-bg: rgba(23, 23, 23, 0.98);
   --card-radius: 24px;

@@ -44,6 +44,9 @@ connection = createConnection({
   onRequeue: ({ title, choicesArray, duration }) =>
     engine.createPoll(choicesArray, title, duration, { requeued: true }),
 
+  // Saved Polls is a PRO-only feature — main has no saved slots to run, so just nudge the upsell.
+  onRunSavedPoll: () => connectionUI.openLockedFeatureModal(),
+
   onSbStatusChange: connectionUI.handleSbStatusChange,
   onTikfinityStatusChange: connectionUI.handleTikfinityStatusChange,
 });

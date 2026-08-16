@@ -314,5 +314,6 @@ export function createConnectionUI({ getConnection, loadConnectionSettings }) {
     init,
     handleSbStatusChange,
     handleTikfinityStatusChange,
+    openLockedFeatureModal,
   };
 }

@@ -49,7 +49,9 @@
   sbClient.on("Raw.Action", (response) => {
     const actionId = response?.data?.actionId;
     if (actionId === TOGGLE_POLL_ACTION_ID) {
-      toggleOverlayVisibility();
+      const pollVisibility = toggleOverlayVisibility();
+      sbClient.executeCodeTrigger("TogglePoll", { pollVisibility })
+        .catch((err) => console.error("[overlay] executeCodeTrigger failed: TogglePoll", err));
     }
   });
 
@@ -188,6 +190,8 @@
       choicesContainer.innerHTML = "";
       if (titleElement) titleElement.textContent = "START A POLL";
     }
+
+    return pollWidget.classList.contains("hidden") ? "hidden" : "visible";
   }
 
   // ---- Rendering poll-engine's emitted events ----

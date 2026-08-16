@@ -9,6 +9,7 @@ export const SB_ACTION_IDS = {
   togglePoll: "705bae3a-36f1-4f42-9bb1-110c8bc5feb7",
   pollEnded: "e5a8fac6-f58e-4344-88eb-9bd13be4ab2e",
   pollStarted: "4c16514d-8672-4c36-823e-ce11219a3bdb",
+  runSavedPoll: "41abf643-fc8b-4983-a75f-2236a99b5a20",
 };
 
 const STORAGE_KEYS = {
@@ -55,6 +56,8 @@ function parseRequeueArgs(args) {
  * @param {() => void} handlers.onClear
  * @param {() => void} handlers.onStartEndToggle
  * @param {(payload: {title: string, choicesArray: object[], duration: number|string}) => void} handlers.onRequeue
+ * @param {(slot: number) => void} [handlers.onRunSavedPoll]
+ *   The "Run Saved Poll" Stream Deck action was pressed, with a `slot` arg (1-10).
  * @param {(connected: boolean, version?: string) => void} [handlers.onSbStatusChange]
  * @param {(connected: boolean) => void} [handlers.onTikfinityStatusChange]
  */
@@ -65,6 +68,7 @@ export function createConnection(handlers) {
     onClear,
     onStartEndToggle,
     onRequeue,
+    onRunSavedPoll = () => {},
     onSbStatusChange = () => {},
     onTikfinityStatusChange = () => {},
   } = handlers;
@@ -142,6 +146,13 @@ export function createConnection(handlers) {
           const args = response?.data?.arguments || {};
           if (!args.requeuedAction) return; // a normal poll start, not an external requeue
           onRequeue(parseRequeueArgs(args));
+          return;
+        }
+
+        case SB_ACTION_IDS.runSavedPoll: {
+          const slot = parseInt(response?.data?.arguments?.slot, 10);
+          if (isNaN(slot)) return;
+          onRunSavedPoll(slot);
           return;
         }
 

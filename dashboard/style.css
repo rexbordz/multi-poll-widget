@@ -58,7 +58,7 @@ body::-webkit-scrollbar-thumb:hover {
   background-color: #777;
 }
 
-/* Loading overlay — shown until the WA custom elements upgrade, so the user never sees a pre-upgrade flash. */
+/* Loading overlay - shown until the WA custom elements loaded, so the user never sees a pre-upgrade flash. */
 #loading-overlay {
   position: fixed;
   inset: 0;
@@ -505,7 +505,7 @@ wa-number-input::part(input)::placeholder {
 }
 
 /* The settings page uses external <label> elements, not WA's slotted
-   label — so the label part is never actually rendered here, but its
+   label - so the label part is never actually rendered here, but its
    margin-bottom still reserves the space underneath every control,
    stacking on top of .input-group's own `gap` and widening the visual
    spacing beyond what the flex gap value alone would suggest. */
