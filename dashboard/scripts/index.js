@@ -33,11 +33,8 @@ connection = createConnection({
   onChatMessage: engine.onChatMessage,
   onDurationPreset: (value) => dashboardUI.applyDurationPreset(value),
 
-  onClear: () => {
-    engine.resetPoll();
-    localStorage.clear();
-    setTimeout(() => location.reload(), 100);
-  },
+  // Same as clicking the dashboard's own Clear button.
+  onClear: () => dashboardUI.clearAll(),
 
   onStartEndToggle: () => dashboardUI.startEndPoll(),
 

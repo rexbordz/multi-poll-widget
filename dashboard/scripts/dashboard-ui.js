@@ -212,13 +212,16 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
     }
   }
 
+  // Title + choices back to defaults and duration kept, same as the dashboard's own Clear button.
+  function clearAll() {
+    onReset();
+    clearPollFields();
+  }
+
   function bindButtons() {
     startEndBtn.addEventListener("click", startEndPoll);
     toggleBtn.addEventListener("click", () => onToggle());
-    resetBtn.addEventListener("click", () => {
-      onReset();
-      clearPollFields();
-    });
+    resetBtn.addEventListener("click", clearAll);
   }
 
   function formatTime(seconds) {
@@ -396,5 +399,6 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
     render,
     startEndPoll, // exposed so an external "Start/End Poll" trigger can drive the same click path
     applyDurationPreset, // exposed for connection.js's duration-preset triggers
+    clearAll, // exposed so the Stream Deck Clear action can drive the same click path as the dashboard's Clear button
   };
 }
