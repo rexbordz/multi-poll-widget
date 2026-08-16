@@ -102,6 +102,11 @@ export function createPollEngine({ doAction, sendToOverlay, onUpdate = () => {} 
 
     let secondsLeft = pollDuration;
 
+    // Tick once up front: the interval's first callback is a full second away, so
+    // without this the dashboard shows nothing for that second and then opens on
+    // pollDuration - 1, permanently a second behind the real countdown.
+    emit("timerTick", { time: secondsLeft });
+
     countdownInterval = setInterval(() => {
       secondsLeft--;
       emit("timerTick", { time: secondsLeft });

@@ -5,11 +5,9 @@
   --text-color: #fff;
   --muted: rgba(255,255,255,0.6);
 
-  --color-choice-1: #3b82f6;
-  --color-choice-2: #ef4444;
-  --color-choice-3: #22c55e;
-  --color-choice-4: #eab308;
-  --color-choice-5: #f97316;
+  /* Dashboard gauges are neutral/light on purpose — per-choice colors are an overlay-only
+     concept, customizable there via the overlay's own CSS. */
+  --gauge-color: rgba(255, 255, 255, 0.92);
 
   /* Shared placeholder color for wa-input and the native choice inputs. */
   --placeholder-color: #494d57;
@@ -543,6 +541,7 @@ wa-select wa-option[value="custom"] {
 
 .choice-container {
   position: relative;
+  isolation: isolate; /* confines .choice-input's mix-blend-mode to this container's own layers */
   display: flex;
   align-items: center;
 
@@ -551,13 +550,19 @@ wa-select wa-option[value="custom"] {
   background-color: #101010;
   border: 1px solid rgba(255, 255, 255, 0.08);
 
-  max-height: 100px;
+  /* Kept snug to the real row height: max-height is what animates the collapse, and
+     any slack above the natural height burns transition time with nothing visibly
+     moving, which reads as a pause followed by a snap. Mirrors how the row is built
+     — one line of text plus the input's fixed padding and the border — so it stays
+     just clear of the content at any font size rather than clipping or over-slacking. */
+  max-height: calc(1.2em + 20px);
   opacity: 1;
 
   transition:
-    max-height 0.5s ease,
+    max-height 0.5s ease-in-out,
     margin 0.5s ease-in-out,
-    opacity 0.4s ease,
+    border-width 0.5s ease-in-out,
+    opacity 0.35s ease,
     transform 0.5s ease-in-out;
 }
 
@@ -598,6 +603,11 @@ wa-select wa-option[value="custom"] {
   text-overflow: ellipsis;
 
   z-index: 2;
+
+  /* Knockout effect: white text differenced against the light gauge-fill reads as
+     black wherever the gauge overlaps it, and stays white over the dark background
+     everywhere else — no duplicated text layers needed. */
+  mix-blend-mode: difference;
 }
 
 /* Add-choice button — dashboard's own choice list is capped at 5 (choices 6-10 are a PRO
@@ -618,7 +628,20 @@ wa-select wa-option[value="custom"] {
   border-radius: 8px;
   color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+
+  max-height: calc(1.4em + 24px); /* snug to the button's height — see .choice-container */
+  opacity: 1;
+  overflow: hidden;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    max-height 0.5s ease-in-out,
+    padding 0.5s ease-in-out,
+    margin-top 0.5s ease-in-out,
+    border-width 0.5s ease-in-out,
+    opacity 0.35s ease;
 }
 
 .add-choice:hover {
@@ -671,15 +694,9 @@ wa-select wa-option[value="custom"] {
   left: 0;
   height: 100%; /* Fill the container height */
   z-index: 1; /* Bottom Layer */
-  transition: width 0.5s ease, opacity 0.3s ease; 
+  background-color: var(--gauge-color);
+  transition: width 0.5s ease, opacity 0.3s ease;
 }
-
-/* Color overrides for the config-page version of the gauges */
-.gauge-fill.config-page.choice-1 { background-color: var(--color-choice-1); opacity: 0.65; }
-.gauge-fill.config-page.choice-2 { background-color: var(--color-choice-2); opacity: 0.65; }
-.gauge-fill.config-page.choice-3 { background-color: var(--color-choice-3); opacity: 0.65; }
-.gauge-fill.config-page.choice-4 { background-color: var(--color-choice-4); opacity: 0.65; }
-.gauge-fill.config-page.choice-5 { background-color: var(--color-choice-5); opacity: 0.65; }
 
 /* When poll is ACTIVE (we will toggle this class via JS) */
 /* Update this block in your CSS */
@@ -693,14 +710,40 @@ wa-select wa-option[value="custom"] {
   visibility: visible;
 }
 
+/* Row spacing here is margin, not .input-group's flex `gap`: `gap` reserves its
+   space between every pair of children no matter how small they collapse, so the
+   hidden rows still left a dead band above Poll Duration. Margin collapses with
+   the row. Note this rule must NOT declare `transition` — its ID specificity
+   would replace the whole transition shorthand on .choice-container/.add-choice
+   and their height/opacity animations would stop running. */
+#choices-group {
+  gap: 0;
+}
+
+#choices-group > *:not(:first-child) {
+  margin-top: 5px;
+}
+
 /* Auto-hide containers with empty inputs when poll is active */
 /* 2. THE SMOOTH HIDE: Replace your display:none logic with this */
 #choices-group.poll-active .choice-container:has(input:placeholder-shown) {
   max-height: 0;
-  margin-bottom: 0;
+  margin-top: 0;
+  border-width: 0; /* animated to 0 rather than `border: none`, which would snap */
   opacity: 0;
   pointer-events: none;
-  border: none; /* Prevents border-ghosting while hidden */
+}
+
+/* Hide the Add Choice button too while a poll is running, with the same collapse.
+   Its padding has to go as well — a 0-height box still renders its padding, which
+   is what was leaving a gap above Poll Duration. */
+#choices-group.poll-active #add-choice-btn {
+  max-height: 0;
+  padding-block: 0;
+  margin-top: 0;
+  border-width: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Lock inputs during the poll so you don't accidentally type while people vote */
@@ -721,21 +764,48 @@ wa-select wa-option[value="custom"] {
   margin-bottom: 5px; 
 }
 
+@property --pie-pct {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
+}
+
 .time-remaining {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
   font-weight: bold;
   font-size: 0.9em; /* Slightly smaller for a "dashboard" look */
   color: #ffffff;
-  
+
   /* 0.5s Ease-In-Out Fade Logic */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
 }
 
+/* Hidden for permanent polls. A class, not an inline `display` — inline would
+   override the flex above and drop the pie onto its own line. */
+.time-remaining.hidden {
+  display: none;
+}
+
 /* When the poll is active, fade the timer in */
 #choices-group.poll-active .time-remaining {
   opacity: 1;
   visibility: visible;
+}
+
+/* Minimal pie-wipe timer — a filled slice that drains clockwise as --pie-pct counts
+   down from 1 (full) to 0 (empty), synced 1:1 with the countdown text next to it. */
+.time-pie {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: conic-gradient(#fff calc(var(--pie-pct) * 360deg), rgba(255, 255, 255, 0.25) 0);
+  transition: --pie-pct 1s linear;
 }
 
 .percent {

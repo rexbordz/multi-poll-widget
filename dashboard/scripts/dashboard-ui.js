@@ -22,6 +22,9 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
   // Hardcoded, not read from durationDropdown.value — wa-select hasn't upgraded yet here, so .value would be undefined.
   let lastSelectedDuration = "0";
 
+  // Total duration of the poll currently running, used to compute the time-pie's fraction remaining.
+  let currentPollDuration = 0;
+
   // ---- Persistent form storage ----
 
   function bindPersistentStorage() {
@@ -49,6 +52,8 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
     durationDropdown.addEventListener("change", () => {
       if (durationDropdown.value !== "custom") {
         lastSelectedDuration = durationDropdown.value;
+        durationInput.value = "";
+        localStorage.setItem(`${STORAGE_PREFIX}duration-input`, "");
       }
     });
 
@@ -222,6 +227,29 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   }
 
+  /**
+   * Drives the countdown pie's fill fraction (0-1).
+   * @param {boolean} [animate] - false snaps instantly; true (default) slides over
+   *   the 1s CSS transition. Snapping uses the same disable/reflow/restore dance as
+   *   resetStatsDisplay() so the jump isn't animated.
+   */
+  function setPie(fraction, animate = true) {
+    const pie = document.querySelector(".time-pie");
+    if (!pie) return;
+
+    const clamped = String(Math.max(0, Math.min(1, fraction)));
+
+    if (animate) {
+      pie.style.setProperty("--pie-pct", clamped);
+      return;
+    }
+
+    pie.style.transition = "none";
+    pie.style.setProperty("--pie-pct", clamped);
+    void pie.offsetWidth; // commit the snap before the transition comes back
+    pie.style.transition = "";
+  }
+
   // ---- Rendering poll-engine's emitted events ----
   // Mirrors each `emit(...)` call in poll-engine.js — script.js's render() switches on the same event names.
 
@@ -233,6 +261,12 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
         } else {
           fillFormFrom(payload);
         }
+
+        currentPollDuration = typeof payload.duration === "number" ? payload.duration : 0;
+
+        // Snap back to full, clearing any leftover fill from the previous poll. The
+        // drain itself starts on the timer's opening tick, emitted right after this.
+        setPie(1, false);
 
         choicesGroup.classList.add("poll-active");
         startEndBtn.disabled = false;
@@ -290,17 +324,25 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
 
       case "timerTick": {
         const timeDisplay = document.querySelector(".time-remaining");
-        if (!timeDisplay) break;
+        const timeText = document.querySelector(".time-text");
+        if (!timeDisplay || !timeText) break;
 
         if (payload.time === "permanent" || payload.time === "" || payload.time === null) {
-          timeDisplay.style.display = "none";
-          timeDisplay.textContent = "";
+          timeDisplay.classList.add("hidden");
+          timeText.textContent = "";
         } else if (payload.time === "ended") {
-          timeDisplay.style.display = "block";
-          timeDisplay.textContent = "Poll Ended!";
+          timeDisplay.classList.remove("hidden");
+          timeText.textContent = "Poll Ended!";
+          setPie(0, false);
         } else {
-          timeDisplay.style.display = "block";
-          timeDisplay.textContent = `Time Left: ${formatTime(payload.time)}`;
+          timeDisplay.classList.remove("hidden");
+          timeText.textContent = `Time Left: ${formatTime(payload.time)}`;
+          // Targets where the pie lands when this second is up, not where it starts:
+          // the 1s transition means whatever we set here is reached a second from now,
+          // which is exactly when the text will read payload.time - 1.
+          if (currentPollDuration > 0) {
+            setPie((payload.time - 1) / currentPollDuration);
+          }
         }
         break;
       }
@@ -316,10 +358,10 @@ export function createDashboardUI({ onStart, onEnd, onToggle, onReset }) {
           });
 
           const timeDisplay = document.querySelector(".time-remaining");
-          if (timeDisplay) {
-            timeDisplay.textContent = "";
-            timeDisplay.style.display = "none";
-          }
+          const timeText = document.querySelector(".time-text");
+          if (timeDisplay) timeDisplay.classList.add("hidden");
+          if (timeText) timeText.textContent = "";
+          setPie(1, false);
 
           startEndBtn.disabled = false;
           startEndBtn.textContent = "Start Poll";
