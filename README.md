@@ -1,15 +1,6 @@
-Are you a multistreamer who’s always asking your viewers for their opinion about stuff? Sure, most platforms have their own poll system, but wouldn’t it be way better if you had **one global poll** that works across all the platforms you stream to?
-
-Introducing **rexbordz’s MultiPoll Widget**.
-
-It’s a clean browser-source widget that lets you run polls right on your stream, pulling votes straight from **Twitch**, **YouTube**, **Kick**, and **TikTok** chat. You can set up 2–5 choices, and your viewers just vote by typing the number of their choice (1, 2, 3, 4, or 5). Simple and universal.
-
-Starting a poll is super easy. I built a very intuitive dock page where you can configure everything. This dock also shows a live data of the poll if there's an active one going on. Isn't that cool?!
-
-<img width="809" height="313" alt="Multipoll sample image" src="https://github.com/user-attachments/assets/3f1e8417-f46d-46b4-af75-4a85c361ad02" />
-
+# MultiPoll Widget
+Run a poll across all the platforms supported -- Twitch, YouTube, Kick and Tiktok. You start a poll using the dock provided in the tool and the poll is displayed on your OBS as an overlay. Your viewers just need to vote by typing the number in chat (e.g., 1-5).
 ---
-
 ## **🔌 Requirements**
 
 <img src="https://github.com/user-attachments/assets/77ff6913-e6d7-4fe0-b9a0-bf66f5e8f745" style="height: 1em; vertical-align: middle;"> **Streamer.Bot (For Twitch, YouTube, and/or Kick)** <br>
@@ -17,9 +8,13 @@ If you need help setting this up, visit their [website](https://streamer.bot/).
 
 <img src="https://github.com/user-attachments/assets/3ec8eac2-17d2-4a97-a066-e55c1e29d2c5" style="height: 1em; vertical-align: middle;"> **Tikfinity (For TikTok)** <br>
 You need this to be able to listen to TikTok events. If you need help setting this up, you can check out my [Tikfinity Setup Guide](https://www.notion.so/Tikfinity-Setup-Guide-241088f4f93e8051b991c6ef4b659934?pvs=21).
+---
+## Video Tutorial
+[![Watch the video](https://img.youtube.com/vi/kynM8l7CP3o/maxresdefault.jpg)](https://youtu.be/kynM8l7CP3o)
+> [!NOTE]
+> The video is a little bit outdated because this was made for the initial release. It still teaches the core of how to install it but there's more details down below.
 
 ---
-
 ## **🚀 Installation**
 
 1. **Open Streamer.bot (For Twitch, YouTube or Kick)**
