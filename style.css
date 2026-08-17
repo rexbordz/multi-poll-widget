@@ -63,7 +63,8 @@ html, body, * {
 html {
   height: 100%;
   margin: 0;
-  background: transparent;
+  background: repeating-conic-gradient(#222 0% 25%, #333 0% 50%);
+  background-size: 20px 20px;
   color: var(--text-color);
 }
 
