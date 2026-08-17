@@ -3,13 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Poll Settings</title>
+  <title>MultiPoll Controller</title>
+  <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="modal.css">
-  <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico">
+
+  <!-- Streamer.bot -->
   <script src="https://cdn.jsdelivr.net/npm/@streamerbot/client/dist/streamerbot-client.min.js"></script>
+
+  <!-- Web Awesome -->
   <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.11.0/styles/themes/default.css">
   <script type="module" src="https://ka-f.webawesome.com/webawesome@3.11.0/webawesome.loader.js"></script>
+
 </head>
 <body>
   <div id="loading-overlay">
@@ -36,7 +49,7 @@
 
       <!-- Integration Check Button -->
       <button class="action-btn integration-check"
-              title="Optional Streamer.bot Actions Status">
+              title="Streamer.bot Actions Status">
         <wa-icon name="bolt-lightning"></wa-icon>
       </button>
 
@@ -50,7 +63,7 @@
   <div class="settings-container">
     <!-- Poll Title -->
     <div class="input-group">
-      <label for="poll-title">Poll Title</label>
+      <label for="poll-title">Prompt</label>
       <wa-input type="text" id="poll-title" placeholder="Type number (1, 2...) in chat to vote"></wa-input>
     </div>
 
@@ -120,7 +133,7 @@
 
     <!-- Duration -->
     <div class="input-group">
-      <label for="duration-dropdown">Poll Duration</label>
+      <label for="duration-dropdown">Duration</label>
       <wa-select id="duration-dropdown" value="0">
         <wa-option value="15">15s</wa-option>
         <wa-option value="30">30s</wa-option>

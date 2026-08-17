@@ -19,8 +19,8 @@
 
 html, body, * {
   font-family: 'InterVariable', 'Inter', sans-serif;
-  font-feature-settings: 'liga' 1, 'calt' 1;
   color: white;
+
 }
 
 body {
@@ -152,7 +152,7 @@ body::-webkit-scrollbar-thumb:hover {
 }
 
 /* Below this width the actions start crowding the title — drop the text, keep the logo. */
-@container (max-width: 250px) {
+@container (max-width: 272px) {
   .widget-title .text {
     display: none;
   }
@@ -524,6 +524,10 @@ wa-number-input::part(input)::placeholder {
 /* Programmatic-only entry, never clickable. Not `disabled` — wa-select rejects .value being set to a disabled option. */
 wa-select wa-option[value="custom"] {
   display: none;
+}
+
+.time-text {
+  font-family: "Roboto Mono", "Space Mono", monospace;
 }
 
 .choice-input:focus {

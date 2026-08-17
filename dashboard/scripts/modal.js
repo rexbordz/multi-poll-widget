@@ -3,13 +3,15 @@
 import { STREAM_DECK_IMPORT_CODE } from "./stream-deck-import-code.js";
 
 const REQUIRED_ACTIONS = [
+  { id: "8413040f-ee21-439d-be53-b44f55d35998", name: "MultiPoll • [SD] Clear" },
+  { id: "41abf643-fc8b-4983-a75f-2236a99b5a20", name: "MultiPoll • [SD] Run Saved Poll" },
   { id: "ec6fb9ae-1a07-4698-bb44-149e05e11b22", name: "MultiPoll • [SD] Set Duration" },
-  { id: "8413040f-ee21-439d-be53-b44f55d35998", name: "MultiPoll • [SD] Clear " },
   { id: "e14a127f-34f6-4091-ba06-a1eb4d387564", name: "MultiPoll • [SD] Start/End Poll" },
   { id: "705bae3a-36f1-4f42-9bb1-110c8bc5feb7", name: "MultiPoll • [SD] Toggle Poll " },
   { id: "510c00ce-3de9-48c3-82fb-a6b30ad37934", name: "MultiPoll • Poll Ended" },
   { id: "4c16514d-8672-4c36-823e-ce11219a3bdb", name: "MultiPoll • Poll Started" },
   { id: "7f9394a3-1b78-4ca1-a978-fad1d54517ad", name: "MultiPoll • Register Custom Triggers" },
+  { id: "36315a8e-25c8-4f5c-a1f3-fd479a7540a7", name: "MultiPoll • Stream Deck Dynamic Buttons" },
 ];
 
 /**
