@@ -1,14 +1,42 @@
-// script.js (overlay) — pure renderer; poll-engine.js on the dashboard owns all state.
-// Classic script (not a module) — kept at the site root for existing OBS browser sources.
-
 (function () {
+  const urlParams = new URLSearchParams(window.location.search);
+  const cardBg = urlParams.get("card-bg");
+  const font = urlParams.get("font");
+  const fontSize = urlParams.get("font-size");
+  const colorChoice1 = urlParams.get("color-choice-1");
+  const colorChoice2 = urlParams.get("color-choice-2");
+  const colorChoice3 = urlParams.get("color-choice-3");
+  const colorChoice4 = urlParams.get("color-choice-4");
+  const colorChoice5 = urlParams.get("color-choice-5");
+  const colorChoice6 = urlParams.get("color-choice-6");
+  const colorChoice7 = urlParams.get("color-choice-7");
+  const colorChoice8 = urlParams.get("color-choice-8");
+  const colorChoice9 = urlParams.get("color-choice-9");
+  const colorChoice10 = urlParams.get("color-choice-10");
+  const alignTop = urlParams.get("align") === "top";
+
+  if (cardBg) document.documentElement.style.setProperty("--card-bg", cardBg);
+  if (font) document.documentElement.style.setProperty("--font", font);
+  if (fontSize) document.documentElement.style.setProperty("--font-size", fontSize);
+  if (colorChoice1) document.documentElement.style.setProperty("--color-choice-1", colorChoice1);
+  if (colorChoice2) document.documentElement.style.setProperty("--color-choice-2", colorChoice2);
+  if (colorChoice3) document.documentElement.style.setProperty("--color-choice-3", colorChoice3);
+  if (colorChoice4) document.documentElement.style.setProperty("--color-choice-4", colorChoice4);
+  if (colorChoice5) document.documentElement.style.setProperty("--color-choice-5", colorChoice5);
+  if (colorChoice6) document.documentElement.style.setProperty("--color-choice-6", colorChoice6);
+  if (colorChoice7) document.documentElement.style.setProperty("--color-choice-7", colorChoice7);
+  if (colorChoice8) document.documentElement.style.setProperty("--color-choice-8", colorChoice8);
+  if (colorChoice9) document.documentElement.style.setProperty("--color-choice-9", colorChoice9);
+  if (colorChoice10) document.documentElement.style.setProperty("--color-choice-10", colorChoice10);
+  document.getElementById("poll-widget")?.classList.toggle("align-top", alignTop);
+
   const STORAGE_KEYS = {
     address: "sb_address",
     port: "sb_port",
     password: "sb_password",
   };
 
-  // Same keys connection.js saves under — reuses the dashboard's saved connection info.
+  // Same keys connection.js saves under, reuses the dashboard's saved connection info.
   function loadConnectionSettings() {
     return {
       address: localStorage.getItem(STORAGE_KEYS.address) || "127.0.0.1",
@@ -43,7 +71,7 @@
     }
   }
 
-  // Toggle Poll's Stream Deck action — listened to directly for an instant toggle.
+  // Toggle Poll's Stream Deck action, listened to directly for an instant toggle.
   const TOGGLE_POLL_ACTION_ID = "705bae3a-36f1-4f42-9bb1-110c8bc5feb7";
 
   sbClient.on("Raw.Action", (response) => {
@@ -69,7 +97,7 @@
     const payload = data.args || data.arguments || data.payload || {};
 
     if (!event) {
-      console.warn("[overlay] Couldn't determine event name — check parseCodeEvent()", response);
+      console.warn("[overlay] Couldn't determine event name, check parseCodeEvent()", response);
       return null;
     }
     return { event, payload };
@@ -85,7 +113,7 @@
   const CHOICE_COLORS = ["choice-1", "choice-2", "choice-3", "choice-4", "choice-5", "choice-6", "choice-7", "choice-8", "choice-9", "choice-10"];
   const FLASH_COLORS = ["flash-choice-1", "flash-choice-2", "flash-choice-3", "flash-choice-4", "flash-choice-5", "flash-choice-6", "flash-choice-7", "flash-choice-8", "flash-choice-9", "flash-choice-10"];
 
-  let isPollActive = false; // render-side bookkeeping only, for togglePoll's blank-state check — not a decision-maker
+  let isPollActive = false; // render-side bookkeeping only, for togglePoll's blank-state check, not a decision-maker
   let lastStats = []; // previous liveStatsUpdate, kept only to detect which choice changed for the vote-key flash
 
   // ---- Building / showing / hiding ----
@@ -128,7 +156,7 @@
   }
 
   // ---- Countdown bar ----
-  // Purely decorative — just animates; PollEnded/PollReset decide when to snap or remove it.
+  // Purely decorative, just animates; PollEnded/PollReset decide when to snap or remove it.
 
   function startTimerBar(duration) {
     let overlay = document.querySelector(".poll-timer-overlay");
@@ -195,7 +223,7 @@
   }
 
   // ---- Rendering poll-engine's emitted events ----
-  // Same event names as dashboard-ui.js's render() — this is the overlay's half of the same switch.
+  // Same event names as dashboard-ui.js's render(), this is the overlay's half of the same switch.
 
   function render(event, payload) {
     switch (event) {
