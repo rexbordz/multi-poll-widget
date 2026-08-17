@@ -29,7 +29,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
 2. **Open TikFinity (For TikTok)**
     -  TikFinity’s WebSocket Server is on by default so there’s nothing else that needs to be done
 3. **Import Streamer.bot Actions**
-    - [Copy the import code from here](https://github.com/rexbordz/multi-poll-widget/blob/main/import.sb)
+    - Open the link in a new tab and copy the [import code](https://github.com/rexbordz/multi-poll-widget/blob/main/import.sb)
     - Click `Import` and paste the code into the textbox
 
       <img width="913" height="618" alt="image" src="https://github.com/user-attachments/assets/a8008849-b776-416b-a945-32d25b36f09c" />
