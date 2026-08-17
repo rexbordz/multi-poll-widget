@@ -1,5 +1,7 @@
 # MultiPoll Widget
+
 Run a poll across all the platforms supported -- Twitch, YouTube, Kick and Tiktok. You start a poll using the dock provided in the tool and the poll is displayed on your OBS as an overlay. Your viewers just need to vote by typing the number in chat (e.g., 1-5).
+
 ---
 ## **🔌 Requirements**
 
@@ -8,8 +10,9 @@ If you need help setting this up, visit their [website](https://streamer.bot/).
 
 <img src="https://github.com/user-attachments/assets/3ec8eac2-17d2-4a97-a066-e55c1e29d2c5" style="height: 1em; vertical-align: middle;"> **Tikfinity (For TikTok)** <br>
 You need this to be able to listen to TikTok events. If you need help setting this up, you can check out my [Tikfinity Setup Guide](https://www.notion.so/Tikfinity-Setup-Guide-241088f4f93e8051b991c6ef4b659934?pvs=21).
+
 ---
-## Video Tutorial
+## ▶️ Video Tutorial
 [![Watch the video](https://img.youtube.com/vi/kynM8l7CP3o/maxresdefault.jpg)](https://youtu.be/kynM8l7CP3o)
 > [!NOTE]
 > The video is a little bit outdated because this was made for the initial release. It still teaches the core of how to install it but there's more details down below.
@@ -63,7 +66,7 @@ You need this to be able to listen to TikTok events. If you need help setting th
   > ✅ **SUCCESS!** You have successfully installed Multipoll.
 
 ---
-## Stream Deck
+## 🟣 Stream Deck
 
 The actions are also compatible with Stream Deck. Just download the pre-made stream deck profiles I made [here](https://github.com/rexbordz/multi-poll-widget/tree/main/streamdeck), and import the correct variant to your Stream Deck Software. Through the Streamer.bot integration, some of the buttons are responsive and know the state of your current poll.
 
@@ -71,7 +74,7 @@ The actions are also compatible with Stream Deck. Just download the pre-made str
 <img width="627" height="442" alt="image" src="https://github.com/user-attachments/assets/4084dd0d-c0fb-4209-9330-f125f00c6785" />
 
 ---
-## For the Nerds
+## 🤓 For the Nerds
 > [!TIP]
 > When you right click a **MultiPoll Widget • Poll Started** trigger and click **Requeue**, it will run that poll again with the same poll configuration.
 
