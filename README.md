@@ -43,20 +43,17 @@ You need this to be able to listen to TikTok events. If you need help setting th
     - Configure the settings to your heart's desire then click `Copy Link URL`
       <img width="2518" height="1314" alt="image" src="https://github.com/user-attachments/assets/a4868567-23d4-48c3-8628-f722569b2982" />
 
-5. Add a `Browser Source` and paste the link in the `URL` field to your streaming software of choice.    
-    <img width="1201" height="974" alt="image" src="https://github.com/user-attachments/assets/f58e8a21-b4a5-4106-80cd-a61b0e2b2406" />
+    - Add a `Browser Source` and paste the link in the `URL` field to your streaming software of choice.    
+        <img width="1201" height="974" alt="image" src="https://github.com/user-attachments/assets/f58e8a21-b4a5-4106-80cd-a61b0e2b2406" />
   
-  > [!TIP]
-  > Make sure to set the height so that there's enough space for the poll with 5 choices at most. The width is stretchable so you can set it to whatever.
-
-6. Add the **MultiPoll Widget Controller** as a **Custom Browser Dock** to your streaming software of choice. 
+5. Add the **MultiPoll Widget Controller** as a **Custom Browser Dock** to your streaming software of choice. 
     
     ```xml
     https://rexbordz.github.io/multi-poll-widget/dashboard
     ```
     <img width="1052" height="623" alt="image" src="https://github.com/user-attachments/assets/bac659a5-fe9e-4db1-ab3f-0e555ca8bf3d" />
         
-7. Start a poll using the Controller page. First two choices are required. When you’re ready, just click **`Start Poll`**.
+6. Start a poll using the Controller page. First two choices are required. When you’re ready, just click **`Start Poll`**.
     <p align="center">
       <img width="469" height="625" alt="image" src="https://github.com/user-attachments/assets/a7b557b1-6204-43cd-8bc0-d402d4ccdfcf" />
     </p>
