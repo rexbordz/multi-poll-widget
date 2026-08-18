@@ -16,7 +16,7 @@
           "label": "Font Size (px)",
           "type": "number",
           "defaultValue": "",
-          "placeholder": 26
+          "placeholder": 24
         },
         {
           "id": "align",
