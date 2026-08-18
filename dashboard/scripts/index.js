@@ -4,6 +4,7 @@ import { createConnection, loadConnectionSettings } from "./connection.js";
 import { createPollEngine } from "./poll-engine.js";
 import { createConnectionUI } from "./modal.js";
 import { createDashboardUI } from "./dashboard-ui.js";
+import { styleDialogScrollbars } from "./dialog-scrollbar.js";
 
 // Declared with `let`: the handlers below close over connection/engine by reference, so it's fine they don't exist yet here.
 
@@ -51,6 +52,9 @@ connection = createConnection({
 dashboardUI.init();
 connectionUI.init(); // also attempts auto-reconnect from saved settings, which triggers connection.connectStreamerbot(...)
 connection.connectTikfinity();
+
+// The dialog bodies scroll inside wa-dialog's shadow root, out of reach of style.css — see dialog-scrollbar.js.
+styleDialogScrollbars();
 
 // Hide the loading overlay once the WA custom elements upgrade; timeout is a safety net if the CDN is slow/unreachable.
 const loadingOverlay = document.getElementById("loading-overlay");

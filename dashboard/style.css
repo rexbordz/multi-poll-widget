@@ -31,29 +31,61 @@ body {
   background-color: #181818;
 }
 
-/* Scrollbar size */
-body::-webkit-scrollbar,
-wa-dialog::part(body)::-webkit-scrollbar,
-.code::-webkit-scrollbar {
+/* Page scrollbar.
+   Keep these selectors in their own rule — never merge them into a list that also
+   contains `wa-dialog::part(body)::-webkit-scrollbar`. Chaining ::-webkit-scrollbar
+   onto ::part() parses in current Chromium but is a syntax error in the older CEF
+   that OBS embeds, and one invalid selector discards the ENTIRE comma-separated
+   list. That takes `width` down with it, and with no base ::-webkit-scrollbar rule
+   matching, Chromium falls back to the native scrollbar (arrow buttons and all)
+   while the -thumb/-track rules below sit inert. Same reason the modal and .code
+   scrollbars each get their own rule rather than sharing one.
+
+   Also deliberately NOT using `scrollbar-width`/`scrollbar-color`: any non-auto
+   value there makes Chromium ignore these pseudo-elements and draw the flat
+   native bar instead. */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
   height: 10px; /* horizontal scrollbar */
   width: 10px;
 }
 
+/* No arrow buttons at the ends — Chromium draws them by default on a custom scrollbar
+   unless they're explicitly zeroed out. */
+html::-webkit-scrollbar-button,
+body::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
 /* Track */
+html::-webkit-scrollbar-track,
 body::-webkit-scrollbar-track {
   background: #1c1c1c;
 }
 
-/* Thumb */
+/* Thumb — fully pilled. The transparent border + padding-box clip insets the pill
+   from the track edges without having to hardcode the track color into the border. */
+html::-webkit-scrollbar-thumb,
 body::-webkit-scrollbar-thumb {
   background-color: #555;
-  border-radius: 5px;
-  border: 2px solid #1c1c1c;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 /* Hover */
+html::-webkit-scrollbar-thumb:hover,
 body::-webkit-scrollbar-thumb:hover {
   background-color: #777;
+}
+
+/* The code block's own horizontal scrollbar. The dialog body's scrollbar is NOT here —
+   it lives in wa-dialog's shadow root and is styled by scripts/dialog-scrollbar.js. */
+.code::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
 }
 
 /* Loading overlay - shown until the WA custom elements loaded, so the user never sees a pre-upgrade flash. */
