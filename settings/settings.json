@@ -8,7 +8,7 @@
           "label": "Custom Font",
           "type": "text",
           "defaultValue": "",
-          "placeholder": "Google Sans"
+          "placeholder": "Inter"
         },
         {
           "id": "size",
