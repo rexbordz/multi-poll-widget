@@ -13,7 +13,8 @@ You need this to be able to listen to TikTok events. If you need help setting th
 
 ---
 ## ▶️ Video Tutorial
-[![Watch the video](https://img.youtube.com/vi/kynM8l7CP3o/maxresdefault.jpg)](https://youtu.be/kynM8l7CP3o)
+[<img width="1920" height="1080" alt="Github Thumbnail" src="https://github.com/user-attachments/assets/63ec415f-2e2d-43cb-b4fe-6451966766eb" />](https://youtu.be/kynM8l7CP3o)
+
 > [!NOTE]
 > The video is a little bit outdated because this was made for the initial release. It still teaches the core of how to install it but there's more details down below.
 
