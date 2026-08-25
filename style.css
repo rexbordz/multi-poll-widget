@@ -68,7 +68,7 @@ html {
 }
 
 body {
-  background-color: #333;
+  background: transparent;
 }
 
 .poll-wrapper {
