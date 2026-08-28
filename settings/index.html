@@ -27,6 +27,7 @@
 
   <script>
     (function () {
+      const CORE_BASE = 'https://rexbordz.github.io/widget-core/core/settings/';
       const frame = document.getElementById('settingsCoreFrame');
       const currentDir = window.location.href.replace(/index\.html(?:\?.*)?$/, '');
       const rootDir = currentDir.replace(/settings\/$/, '');
@@ -49,9 +50,8 @@
           storageKey: 'multipoll-settings',
         },
       };
-      const sessionKey = 'settings-core:' + window.location.pathname;
-      sessionStorage.setItem(sessionKey, JSON.stringify(bootConfig));
-      frame.src = rootDir + '.common/core/settings/index.html?sessionKey=' + encodeURIComponent(sessionKey);
+      
+      frame.src = CORE_BASE + 'index.html#boot=' + encodeURIComponent(JSON.stringify(bootConfig));
 
       // index.html only renders once a live poll starts, so it'd sit blank in the
       // settings live-preview panel. Redirect just that one iframe to the static
